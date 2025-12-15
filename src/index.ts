@@ -7,6 +7,7 @@ import cors from 'cors';
 import accountRoutes from './routes/accountRoutes';
 import userRoutes from './routes/userRoutes';
 import businessRoutes from './routes/businessRoutes';
+import itemRoutes from './routes/itemRoutes';
 import { 
   requestIdMiddleware, 
   errorHandler, 
@@ -39,6 +40,7 @@ app.get('/health', (req, res) => {
 app.use('/api/accounts', accountRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/business', businessRoutes);
+app.use('/api/items', itemRoutes);
 
 // 404 handler for undefined routes
 app.use(notFoundHandler);
@@ -65,6 +67,7 @@ app.listen(PORT, () => {
   logger.info('SERVER', `  - Accounts: http://localhost:${PORT}/api/accounts`);
   logger.info('SERVER', `  - Users: http://localhost:${PORT}/api/users`);
   logger.info('SERVER', `  - Business: http://localhost:${PORT}/api/business`);
+  logger.info('SERVER', `  - Items: http://localhost:${PORT}/api/items`);
 });
 
 export default app;

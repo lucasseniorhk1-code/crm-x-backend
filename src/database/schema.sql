@@ -49,6 +49,18 @@ CREATE TABLE business
     created_at   TIMESTAMPTZ      DEFAULT NOW()
 );
 
+-- Create item table for products and services (requirements 6.1, 6.2, 6.3, 6.5)
+CREATE TABLE item
+(
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name        TEXT    NOT NULL,
+    type        TEXT    NOT NULL, -- PRODUCT or SERVICE (validated in application)
+    price       NUMERIC NOT NULL,
+    sku_code    TEXT,             -- Optional SKU code
+    description TEXT,             -- Optional description
+    created_at  TIMESTAMPTZ      DEFAULT NOW()
+);
+
 -- Create indexes for better query performance
 CREATE INDEX idx_account_responsible_id ON account (responsible_id);
 CREATE INDEX idx_account_status ON account (status);
@@ -59,3 +71,7 @@ CREATE INDEX idx_business_account_id ON business (account_id);
 CREATE INDEX idx_business_owner_id ON business (owner_id);
 CREATE INDEX idx_business_stage ON business (stage);
 CREATE INDEX idx_users_manager_id ON users (manager_id);
+CREATE INDEX idx_item_name ON item (name);
+CREATE INDEX idx_item_type ON item (type);
+CREATE INDEX idx_item_price ON item (price);
+CREATE INDEX idx_item_sku_code ON item (sku_code);

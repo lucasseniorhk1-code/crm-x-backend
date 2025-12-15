@@ -33,6 +33,7 @@ export interface Translations {
       account: string;
       user: string;
       business: string;
+      item: string;
       route: string;
     };
     server: {
@@ -46,6 +47,13 @@ export interface Translations {
       account: string;
       user: string;
       business: string;
+      item: string;
+    };
+    created: {
+      item: string;
+    };
+    updated: {
+      item: string;
     };
   };
   fields: {
@@ -74,6 +82,9 @@ export interface Translations {
     page: string;
     size: string;
     filter: string;
+    price: string;
+    skuCode: string;
+    description: string;
   };
 }
 
@@ -110,6 +121,7 @@ const translations: Record<Language, Translations> = {
         account: 'Conta não encontrada',
         user: 'Usuário não encontrado',
         business: 'Negócio não encontrado',
+        item: 'Item não encontrado',
         route: 'Rota não encontrada',
       },
       server: {
@@ -123,6 +135,13 @@ const translations: Record<Language, Translations> = {
         account: 'Conta excluída com sucesso',
         user: 'Usuário excluído com sucesso',
         business: 'Negócio excluído com sucesso',
+        item: 'Item excluído com sucesso',
+      },
+      created: {
+        item: 'Item criado com sucesso',
+      },
+      updated: {
+        item: 'Item atualizado com sucesso',
       },
     },
     fields: {
@@ -151,6 +170,9 @@ const translations: Record<Language, Translations> = {
       page: 'Página',
       size: 'Tamanho',
       filter: 'Filtro',
+      price: 'Preço',
+      skuCode: 'Código SKU',
+      description: 'Descrição',
     },
   },
   'en-US': {
@@ -185,6 +207,7 @@ const translations: Record<Language, Translations> = {
         account: 'Account not found',
         user: 'User not found',
         business: 'Business not found',
+        item: 'Item not found',
         route: 'Route not found',
       },
       server: {
@@ -198,6 +221,13 @@ const translations: Record<Language, Translations> = {
         account: 'Account deleted successfully',
         user: 'User deleted successfully',
         business: 'Business deleted successfully',
+        item: 'Item deleted successfully',
+      },
+      created: {
+        item: 'Item created successfully',
+      },
+      updated: {
+        item: 'Item updated successfully',
       },
     },
     fields: {
@@ -226,6 +256,9 @@ const translations: Record<Language, Translations> = {
       page: 'Page',
       size: 'Size',
       filter: 'Filter',
+      price: 'Price',
+      skuCode: 'SKU Code',
+      description: 'Description',
     },
   },
   'es-CO': {
@@ -260,6 +293,7 @@ const translations: Record<Language, Translations> = {
         account: 'Cuenta no encontrada',
         user: 'Usuario no encontrado',
         business: 'Negocio no encontrado',
+        item: 'Artículo no encontrado',
         route: 'Ruta no encontrada',
       },
       server: {
@@ -273,6 +307,13 @@ const translations: Record<Language, Translations> = {
         account: 'Cuenta eliminada exitosamente',
         user: 'Usuario eliminado exitosamente',
         business: 'Negocio eliminado exitosamente',
+        item: 'Artículo eliminado exitosamente',
+      },
+      created: {
+        item: 'Artículo creado exitosamente',
+      },
+      updated: {
+        item: 'Artículo actualizado exitosamente',
       },
     },
     fields: {
@@ -301,6 +342,9 @@ const translations: Record<Language, Translations> = {
       page: 'Página',
       size: 'Tamaño',
       filter: 'Filtro',
+      price: 'Precio',
+      skuCode: 'Código SKU',
+      description: 'Descripción',
     },
   },
 };
@@ -399,6 +443,8 @@ export function getNotFoundMessage(entityType: string, language: Language = 'pt-
       return t.errors.not_found.user;
     case 'business':
       return t.errors.not_found.business;
+    case 'item':
+      return t.errors.not_found.item;
     default:
       return t.errors.not_found.route;
   }
@@ -412,15 +458,31 @@ export function getSuccessMessage(
 ): string {
   const t = getTranslations(language);
   
-  if (action === 'deleted') {
-    switch (entityType.toLowerCase()) {
-      case 'account':
-        return t.success.deleted.account;
-      case 'user':
-        return t.success.deleted.user;
-      case 'business':
-        return t.success.deleted.business;
-    }
+  switch (action.toLowerCase()) {
+    case 'deleted':
+      switch (entityType.toLowerCase()) {
+        case 'account':
+          return t.success.deleted.account;
+        case 'user':
+          return t.success.deleted.user;
+        case 'business':
+          return t.success.deleted.business;
+        case 'item':
+          return t.success.deleted.item;
+      }
+      break;
+    case 'created':
+      switch (entityType.toLowerCase()) {
+        case 'item':
+          return t.success.created.item;
+      }
+      break;
+    case 'updated':
+      switch (entityType.toLowerCase()) {
+        case 'item':
+          return t.success.updated.item;
+      }
+      break;
   }
   
   return 'Operação realizada com sucesso';

@@ -31,12 +31,18 @@ export const Currencies = {
   EUR: 'EUR'
 } as const;
 
+export const ItemTypes = {
+  PRODUCT: 'PRODUCT',
+  SERVICE: 'SERVICE'
+} as const;
+
 // Type definitions derived from enums
 export type UserRole = typeof UserRoles[keyof typeof UserRoles];
 export type AccountStatus = typeof AccountStatuses[keyof typeof AccountStatuses];
 export type AccountType = typeof AccountTypes[keyof typeof AccountTypes];
 export type BusinessStage = typeof BusinessStages[keyof typeof BusinessStages];
 export type Currency = typeof Currencies[keyof typeof Currencies];
+export type ItemType = typeof ItemTypes[keyof typeof ItemTypes];
 
 // Validation helper functions
 export const isValidUserRole = (value: string): value is UserRole => {
@@ -57,6 +63,10 @@ export const isValidBusinessStage = (value: string): value is BusinessStage => {
 
 export const isValidCurrency = (value: string): value is Currency => {
   return Object.values(Currencies).includes(value as Currency);
+};
+
+export const isValidItemType = (value: string): value is ItemType => {
+  return Object.values(ItemTypes).includes(value as ItemType);
 };
 
 // User Interface (Database representation - snake_case)
@@ -142,6 +152,28 @@ export interface Business {
   probability?: number;
   ownerId?: string;
   closingDate?: string;
+  createdAt: string;
+}
+
+// Item Interface (Database representation - snake_case)
+export interface ItemDB {
+  id: string;
+  name: string;
+  type: string;
+  price: number;
+  sku_code?: string | null;
+  description?: string | null;
+  created_at: string;
+}
+
+// Item Interface (API representation - camelCase)
+export interface Item {
+  id: string;
+  name: string;
+  type: string;
+  price: number;
+  skuCode?: string;
+  description?: string;
   createdAt: string;
 }
 
@@ -236,11 +268,37 @@ export interface AccountQueryParams {
   size?: number;
 }
 
+export interface CreateItemRequest {
+  name: string;
+  type: string;
+  price: number;
+  skuCode?: string;
+  description?: string;
+}
+
+export interface UpdateItemRequest {
+  name?: string;
+  type?: string;
+  price?: number;
+  skuCode?: string | null;
+  description?: string | null;
+}
+
+export interface ItemQueryParams {
+  search?: string;
+  type?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  page?: number;
+  size?: number;
+}
+
 // Default value helpers
 export const getDefaultUserRole = (): UserRole => UserRoles.SALES_REP;
 export const getDefaultAccountStatus = (): AccountStatus => AccountStatuses.ACTIVE;
 export const getDefaultAccountType = (): AccountType => AccountTypes.LEAD;
 export const getDefaultCurrency = (): Currency => Currencies.BRL;
+export const getDefaultItemType = (): ItemType => ItemTypes.PRODUCT;
 
 // Utility function to remove null and undefined fields from objects
 function removeNullUndefinedFields<T extends Record<string, any>>(obj: T): Partial<T> {
@@ -351,4 +409,30 @@ export function userApiToDb(apiUser: CreateUserRequest | UpdateUserRequest): Par
   if ('email' in apiUser && apiUser.email !== undefined) dbUser.email = apiUser.email;
   
   return dbUser;
+}
+
+export function itemDbToApi(dbItem: ItemDB): Item {
+  const item = {
+    id: dbItem.id,
+    name: dbItem.name,
+    type: dbItem.type,
+    price: dbItem.price,
+    skuCode: dbItem.sku_code,
+    description: dbItem.description,
+    createdAt: dbItem.created_at
+  };
+  
+  return removeNullUndefinedFields(item) as Item;
+}
+
+export function itemApiToDb(apiItem: CreateItemRequest | UpdateItemRequest): Partial<ItemDB> {
+  const dbItem: Partial<ItemDB> = {};
+  
+  if ('name' in apiItem && apiItem.name !== undefined) dbItem.name = apiItem.name;
+  if ('type' in apiItem && apiItem.type !== undefined) dbItem.type = apiItem.type;
+  if ('price' in apiItem && apiItem.price !== undefined) dbItem.price = apiItem.price;
+  if ('skuCode' in apiItem && apiItem.skuCode !== undefined) dbItem.sku_code = apiItem.skuCode;
+  if ('description' in apiItem && apiItem.description !== undefined) dbItem.description = apiItem.description;
+  
+  return dbItem;
 }
