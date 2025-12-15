@@ -19,11 +19,25 @@ const ALLOWED_FIELDS = {
   'created_at': 'created_at',
   'last_interaction': 'last_interaction',
   
+  // Business fields (snake_case for database)
+  'title': 'title',
+  'account_id': 'account_id',
+  'value': 'value',
+  'currency': 'currency',
+  'stage': 'stage',
+  'probability': 'probability',
+  'owner_id': 'owner_id',
+  'closing_date': 'closing_date',
+  
+  // User fields (snake_case for database)
+  'role': 'role',
+  'manager_id': 'manager_id',
+  
   // Owner relationship fields (will be handled with joins)
-  'owner.id': 'profiles.id',
-  'owner.name': 'profiles.name',
-  'owner.email': 'profiles.email',
-  'owner.role': 'profiles.role'
+  'owner.id': 'users.id',
+  'owner.name': 'users.name',
+  'owner.email': 'users.email',
+  'owner.role': 'users.role'
 } as const;
 
 // Allowed operators
@@ -233,11 +247,11 @@ export function applyFiltersToQuery(query: any, parsedFilter: ParsedFilter): any
     return query;
   }
 
-  // If we have owner filters, we need to join with profiles table
+  // If we have owner filters, we need to join with users table
   if (parsedFilter.hasOwnerFilter) {
     query = query.select(`
       *,
-      profiles!owner_id (
+      users!owner_id (
         id,
         name,
         email,

@@ -37,7 +37,7 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
 export interface Database {
   public: {
     Tables: {
-      profiles: {
+      users: {
         Row: {
           id: string;
           name: string;
@@ -116,7 +116,7 @@ export interface Database {
           created_at?: string;
         };
       };
-      deal: {
+      business: {
         Row: {
           id: string;
           title: string;

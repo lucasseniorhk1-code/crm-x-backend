@@ -16,7 +16,7 @@ export const AccountTypes = {
   CLIENT: 'Client'
 } as const;
 
-export const DealStages = {
+export const BusinessStages = {
   PROSPECTING: 'Prospecting',
   QUALIFICATION: 'Qualification',
   PROPOSAL: 'Proposal',
@@ -35,7 +35,7 @@ export const Currencies = {
 export type UserRole = typeof UserRoles[keyof typeof UserRoles];
 export type AccountStatus = typeof AccountStatuses[keyof typeof AccountStatuses];
 export type AccountType = typeof AccountTypes[keyof typeof AccountTypes];
-export type DealStage = typeof DealStages[keyof typeof DealStages];
+export type BusinessStage = typeof BusinessStages[keyof typeof BusinessStages];
 export type Currency = typeof Currencies[keyof typeof Currencies];
 
 // Validation helper functions
@@ -51,16 +51,16 @@ export const isValidAccountType = (value: string): value is AccountType => {
   return Object.values(AccountTypes).includes(value as AccountType);
 };
 
-export const isValidDealStage = (value: string): value is DealStage => {
-  return Object.values(DealStages).includes(value as DealStage);
+export const isValidBusinessStage = (value: string): value is BusinessStage => {
+  return Object.values(BusinessStages).includes(value as BusinessStage);
 };
 
 export const isValidCurrency = (value: string): value is Currency => {
   return Object.values(Currencies).includes(value as Currency);
 };
 
-// Profile Interface (Database representation - snake_case)
-export interface ProfileDB {
+// User Interface (Database representation - snake_case)
+export interface UserDB {
   id: string;
   name: string;
   role: string;
@@ -69,8 +69,8 @@ export interface ProfileDB {
   created_at: string;
 }
 
-// Profile Interface (API representation - camelCase)
-export interface Profile {
+// User Interface (API representation - camelCase)
+export interface User {
   id: string;
   name: string;
   role: string;
@@ -108,17 +108,17 @@ export interface Account {
   type: string;
   pipeline: string;
   lastInteraction: string;
-  email?: string | null;
-  phone?: string | null;
-  cnpj?: string | null;
-  instagram?: string | null;
-  linkedin?: string | null;
-  whatsapp?: string | null;
+  email?: string;
+  phone?: string;
+  cnpj?: string;
+  instagram?: string;
+  linkedin?: string;
+  whatsapp?: string;
   createdAt: string;
 }
 
-// Deal Interface (Database representation - snake_case)
-export interface DealDB {
+// Business Interface (Database representation - snake_case)
+export interface BusinessDB {
   id: string;
   title: string;
   account_id: string;
@@ -131,15 +131,15 @@ export interface DealDB {
   created_at: string;
 }
 
-// Deal Interface (API representation - camelCase)
-export interface Deal {
+// Business Interface (API representation - camelCase)
+export interface Business {
   id: string;
   title: string;
   accountId: string;
   value: number;
   currency: string;
   stage: string;
-  probability: number;
+  probability?: number;
   ownerId?: string;
   closingDate?: string;
   createdAt: string;
@@ -193,7 +193,7 @@ export interface UpdateAccountRequest {
   whatsapp?: string | null;
 }
 
-export interface CreateDealRequest {
+export interface CreateBusinessRequest {
   title: string;
   accountId: string;
   value: number;
@@ -204,7 +204,7 @@ export interface CreateDealRequest {
   closingDate?: string;
 }
 
-export interface UpdateDealRequest {
+export interface UpdateBusinessRequest {
   title?: string;
   accountId?: string;
   value?: number;
@@ -213,6 +213,20 @@ export interface UpdateDealRequest {
   probability?: number;
   ownerId?: string;
   closingDate?: string | null;
+}
+
+export interface CreateUserRequest {
+  name: string;
+  role?: string;
+  managerId?: string;
+  email: string;
+}
+
+export interface UpdateUserRequest {
+  name?: string;
+  role?: string;
+  managerId?: string;
+  email?: string;
 }
 
 export interface AccountQueryParams {
@@ -230,9 +244,22 @@ export const getDefaultAccountStatus = (): AccountStatus => AccountStatuses.ACTI
 export const getDefaultAccountType = (): AccountType => AccountTypes.LEAD;
 export const getDefaultCurrency = (): Currency => Currencies.BRL;
 
+// Utility function to remove null and undefined fields from objects
+function removeNullUndefinedFields<T extends Record<string, any>>(obj: T): Partial<T> {
+  const result: Partial<T> = {};
+  
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== null && value !== undefined) {
+      result[key as keyof T] = value;
+    }
+  }
+  
+  return result;
+}
+
 // Conversion utility functions
 export function accountDbToApi(dbAccount: AccountDB): Account {
-  return {
+  const account = {
     id: dbAccount.id,
     name: dbAccount.name,
     segment: dbAccount.segment,
@@ -249,6 +276,8 @@ export function accountDbToApi(dbAccount: AccountDB): Account {
     whatsapp: dbAccount.whatsapp,
     createdAt: dbAccount.created_at
   };
+  
+  return removeNullUndefinedFields(account) as Account;
 }
 
 export function accountApiToDb(apiAccount: CreateAccountRequest | UpdateAccountRequest): Partial<AccountDB> {
@@ -270,32 +299,58 @@ export function accountApiToDb(apiAccount: CreateAccountRequest | UpdateAccountR
   return dbAccount;
 }
 
-export function dealDbToApi(dbDeal: DealDB): Deal {
-  return {
-    id: dbDeal.id,
-    title: dbDeal.title,
-    accountId: dbDeal.account_id,
-    value: dbDeal.value,
-    currency: dbDeal.currency,
-    stage: dbDeal.stage,
-    probability: dbDeal.probability,
-    ownerId: dbDeal.owner_id,
-    closingDate: dbDeal.closing_date,
-    createdAt: dbDeal.created_at
+export function businessDbToApi(dbBusiness: BusinessDB): Business {
+  const business = {
+    id: dbBusiness.id,
+    title: dbBusiness.title,
+    accountId: dbBusiness.account_id,
+    value: dbBusiness.value,
+    currency: dbBusiness.currency,
+    stage: dbBusiness.stage,
+    probability: dbBusiness.probability,
+    ownerId: dbBusiness.owner_id,
+    closingDate: dbBusiness.closing_date,
+    createdAt: dbBusiness.created_at
   };
+  
+  return removeNullUndefinedFields(business) as Business;
 }
 
-export function dealApiToDb(apiDeal: CreateDealRequest | UpdateDealRequest): Partial<DealDB> {
-  const dbDeal: Partial<DealDB> = {};
+export function businessApiToDb(apiBusiness: CreateBusinessRequest | UpdateBusinessRequest): Partial<BusinessDB> {
+  const dbBusiness: Partial<BusinessDB> = {};
   
-  if ('title' in apiDeal && apiDeal.title !== undefined) dbDeal.title = apiDeal.title;
-  if ('accountId' in apiDeal && apiDeal.accountId !== undefined) dbDeal.account_id = apiDeal.accountId;
-  if ('value' in apiDeal && apiDeal.value !== undefined) dbDeal.value = apiDeal.value;
-  if ('currency' in apiDeal && apiDeal.currency !== undefined) dbDeal.currency = apiDeal.currency;
-  if ('stage' in apiDeal && apiDeal.stage !== undefined) dbDeal.stage = apiDeal.stage;
-  if ('probability' in apiDeal && apiDeal.probability !== undefined) dbDeal.probability = apiDeal.probability;
-  if ('ownerId' in apiDeal && apiDeal.ownerId !== undefined) dbDeal.owner_id = apiDeal.ownerId;
-  if ('closingDate' in apiDeal && apiDeal.closingDate !== undefined) dbDeal.closing_date = apiDeal.closingDate || undefined;
+  if ('title' in apiBusiness && apiBusiness.title !== undefined) dbBusiness.title = apiBusiness.title;
+  if ('accountId' in apiBusiness && apiBusiness.accountId !== undefined) dbBusiness.account_id = apiBusiness.accountId;
+  if ('value' in apiBusiness && apiBusiness.value !== undefined) dbBusiness.value = apiBusiness.value;
+  if ('currency' in apiBusiness && apiBusiness.currency !== undefined) dbBusiness.currency = apiBusiness.currency;
+  if ('stage' in apiBusiness && apiBusiness.stage !== undefined) dbBusiness.stage = apiBusiness.stage;
+  if ('probability' in apiBusiness && apiBusiness.probability !== undefined) dbBusiness.probability = apiBusiness.probability;
+  if ('ownerId' in apiBusiness && apiBusiness.ownerId !== undefined) dbBusiness.owner_id = apiBusiness.ownerId;
+  if ('closingDate' in apiBusiness && apiBusiness.closingDate !== undefined) dbBusiness.closing_date = apiBusiness.closingDate || undefined;
   
-  return dbDeal;
+  return dbBusiness;
+}
+
+export function userDbToApi(dbUser: UserDB): User {
+  const user = {
+    id: dbUser.id,
+    name: dbUser.name,
+    role: dbUser.role,
+    managerId: dbUser.manager_id,
+    email: dbUser.email,
+    createdAt: dbUser.created_at
+  };
+  
+  return removeNullUndefinedFields(user) as User;
+}
+
+export function userApiToDb(apiUser: CreateUserRequest | UpdateUserRequest): Partial<UserDB> {
+  const dbUser: Partial<UserDB> = {};
+  
+  if ('name' in apiUser && apiUser.name !== undefined) dbUser.name = apiUser.name;
+  if ('role' in apiUser && apiUser.role !== undefined) dbUser.role = apiUser.role;
+  if ('managerId' in apiUser && apiUser.managerId !== undefined) dbUser.manager_id = apiUser.managerId;
+  if ('email' in apiUser && apiUser.email !== undefined) dbUser.email = apiUser.email;
+  
+  return dbUser;
 }

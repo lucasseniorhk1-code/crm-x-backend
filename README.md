@@ -57,23 +57,112 @@ npm start
 ```
 src/
 ├── controllers/     # Controladores da API
+├── database/        # Scripts SQL e migrações
 ├── middleware/      # Middlewares (autenticação, etc.)
+├── routes/          # Definições de rotas da API
 ├── schemas/         # Esquemas de validação Zod
 ├── types/          # Interfaces e tipos TypeScript
 ├── test/           # Configuração de testes
+├── utils/          # Utilitários e helpers
 └── index.ts        # Ponto de entrada da aplicação
 ```
+
+## Migração de Tabelas
+
+Execute o script de migração único que funciona tanto para bancos existentes quanto novos:
+
+```sql
+-- Execute no Supabase SQL Editor
+-- Este script detecta automaticamente se você tem dados existentes ou é uma instalação nova
+\i src/database/migration_deal_to_business.sql
+```
+
+O script faz automaticamente:
+- **Se tabela `profiles` existe**: Renomeia para `users` e atualiza índices e referências
+- **Se tabela `deal` existe**: Renomeia para `business` e atualiza índices
+- **Se é instalação nova**: Cria tabelas `users` e `business` com índices corretos
+- **Verificação**: Confirma que tudo foi criado/migrado corretamente
 
 ## API Endpoints
 
 ### Contas
 - `POST /api/accounts` - Criar nova conta
 - `GET /api/accounts` - Listar contas (com filtros e paginação)
+- `GET /api/accounts/:id` - Obter conta por ID
 - `PUT /api/accounts/:id` - Atualizar conta
 - `DELETE /api/accounts/:id` - Eliminar conta
 
+### Usuários
+- `POST /api/users` - Criar novo usuário
+- `GET /api/users` - Listar usuários (com filtros e paginação)
+- `GET /api/users/:id` - Obter usuário por ID
+- `PUT /api/users/:id` - Atualizar usuário
+- `DELETE /api/users/:id` - Eliminar usuário
+
+### Negócios
+- `POST /api/business` - Criar novo negócio
+- `GET /api/business` - Listar negócios (com filtros e paginação)
+- `GET /api/business/:id` - Obter negócio por ID
+- `PUT /api/business/:id` - Atualizar negócio
+- `DELETE /api/business/:id` - Eliminar negócio
+
 ### Health Check
 - `GET /health` - Verificar status da aplicação
+
+## Parâmetros de Query para APIs GET/all
+
+Todas as APIs de listagem (GET /api/accounts, GET /api/users, GET /api/business) aceitam apenas os seguintes parâmetros:
+
+### Paginação
+- `page` (opcional): Número da página (padrão: 1)
+- `size` (opcional): Número de itens por página (padrão: 10, máximo: 100)
+
+### Filtros
+- `filter` (opcional): Filtro dinâmico usando sintaxe SQL-like
+
+### Exemplos de Uso
+
+#### Paginação básica
+```
+GET /api/accounts?page=2&size=20
+```
+
+#### Filtros dinâmicos
+```
+# Filtrar por status
+GET /api/accounts?filter=status = 'ACTIVE'
+
+# Filtrar por múltiplas condições
+GET /api/accounts?filter=status = 'ACTIVE' AND type = 'Lead'
+
+# Filtrar com LIKE (busca parcial)
+GET /api/accounts?filter=name ILIKE '%empresa%'
+
+# Filtrar com IN (múltiplos valores)
+GET /api/business?filter=stage IN ('Proposal', 'Negotiation')
+
+# Combinar filtros e paginação
+GET /api/users?filter=role = 'SALES_REP'&page=1&size=10
+```
+
+#### Campos disponíveis para filtros
+
+**Contas (accounts):**
+- `id`, `name`, `segment`, `status`, `type`, `pipeline`
+- `email`, `phone`, `cnpj`, `instagram`, `linkedin`, `whatsapp`
+- `created_at`, `last_interaction`
+
+**Usuários (users):**
+- `id`, `name`, `email`, `role`, `manager_id`, `created_at`
+
+**Negócios (business):**
+- `id`, `title`, `account_id`, `value`, `currency`, `stage`
+- `probability`, `owner_id`, `closing_date`, `created_at`
+
+#### Operadores suportados
+- `=`, `!=`, `<>`, `<`, `>`, `<=`, `>=`
+- `LIKE`, `ILIKE` (busca com wildcards %)
+- `IN`, `NOT IN` (múltiplos valores entre parênteses)
 
 ## Variáveis de Ambiente
 

@@ -5,6 +5,8 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import accountRoutes from './routes/accountRoutes';
+import userRoutes from './routes/userRoutes';
+import businessRoutes from './routes/businessRoutes';
 import { 
   requestIdMiddleware, 
   errorHandler, 
@@ -27,7 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
-    message: 'CRM Accounts Module is running',
+    message: 'CRM is running',
     timestamp: new Date().toISOString(),
     request_id: (req as any).requestId
   });
@@ -35,6 +37,8 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/api/accounts', accountRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/business', businessRoutes);
 
 // 404 handler for undefined routes
 app.use(notFoundHandler);
@@ -57,7 +61,10 @@ process.on('SIGINT', () => {
 app.listen(PORT, () => {
   logger.serverStart(Number(PORT));
   logger.info('SERVER', `Health check available at http://localhost:${PORT}/health`);
-  logger.info('SERVER', `API endpoints available at http://localhost:${PORT}/api/accounts`);
+  logger.info('SERVER', `API endpoints available at:`);
+  logger.info('SERVER', `  - Accounts: http://localhost:${PORT}/api/accounts`);
+  logger.info('SERVER', `  - Users: http://localhost:${PORT}/api/users`);
+  logger.info('SERVER', `  - Business: http://localhost:${PORT}/api/business`);
 });
 
 export default app;

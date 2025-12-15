@@ -57,7 +57,7 @@ export async function createAccount(req: Request, res: Response): Promise<void> 
       if (error.code === '23503' && error.details?.includes('owner_id')) {
         res.status(400).json({
           error: 'Foreign Key Violation',
-          message: 'Invalid owner_id: referenced profile does not exist',
+          message: 'Invalid owner_id: referenced user does not exist',
           details: error
         } as ErrorResponse);
         return;
@@ -150,28 +150,6 @@ export async function getAccounts(req: Request, res: Response): Promise<void> {
         const parsedFilter = parseFilter(decodedFilter);
         logger.filterParsing(decodedFilter, true);
         query = applyFiltersToQuery(query, parsedFilter);
-      } else {
-        // Apply legacy filters for backward compatibility
-        
-        // Apply search filter (name or segment)
-        if (queryParams.search) {
-          query = query.or(`name.ilike.%${queryParams.search}%,segment.ilike.%${queryParams.search}%`);
-        }
-
-        // Apply status filter
-        if (queryParams.status) {
-          query = query.eq('status', queryParams.status);
-        }
-
-        // Apply type filter
-        if (queryParams.type) {
-          query = query.eq('type', queryParams.type);
-        }
-
-        // Apply ownerId filter
-        if (queryParams.ownerId) {
-          query = query.eq('owner_id', queryParams.ownerId);
-        }
       }
     } catch (filterError) {
       let decodedFilter = '';
@@ -305,7 +283,7 @@ export async function updateAccount(req: Request, res: Response): Promise<void> 
       if (error.code === '23503' && error.details?.includes('owner_id')) {
         res.status(400).json({
           error: 'Foreign Key Violation',
-          message: 'Invalid owner_id: referenced profile does not exist',
+          message: 'Invalid owner_id: referenced user does not exist',
           details: error
         } as ErrorResponse);
         return;
@@ -367,7 +345,7 @@ export async function deleteAccount(req: Request, res: Response): Promise<void> 
     }
 
     // Delete account from database
-    // Note: Cascading operations for related deal will be handled by database constraints
+    // Note: Cascading operations for related business will be handled by database constraints
     const { error } = await supabaseAdmin
       .from('account')
       .delete()
@@ -376,11 +354,11 @@ export async function deleteAccount(req: Request, res: Response): Promise<void> 
     if (error) {
       logger.dbError('DELETE', 'account', error as Error);
       
-      // Handle foreign key constraint violation (related deals exist)
+      // Handle foreign key constraint violation (related business exist)
       if (error.code === '23503') {
         res.status(409).json({
           error: 'Constraint Violation',
-          message: 'Cannot delete account: related deal exist. Please delete related deal first or handle cascading operations.',
+          message: 'Cannot delete account: related business exist. Please delete related business first or handle cascading operations.',
           details: error
         } as ErrorResponse);
         return;
