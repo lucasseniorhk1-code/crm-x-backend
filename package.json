@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "CRM X Accounts Module - Node.js TypeScript API with Express.js and Supabase",
   "main": "dist/index.js",
+  "engines": {
+    "node": "24.11.1"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
