@@ -7,6 +7,7 @@ import {
   updateAccount,
   deleteAccount
 } from '../controllers/accountController';
+import { getAccountTimelineByAccountId } from '../controllers/accountTimelineController';
 
 const router = Router();
 
@@ -19,6 +20,9 @@ router.post('/', createAccount);
 
 // GET /api/accounts - Get all accounts with filtering and pagination
 router.get('/', getAccounts);
+
+// GET /api/accounts/:accountId/timeline - Get timeline for specific account
+router.get('/:accountId/timeline', getAccountTimelineByAccountId);
 
 // GET /api/accounts/:id - Get single account by ID
 router.get('/:id', getAccountById);

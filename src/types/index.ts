@@ -36,6 +36,14 @@ export const ItemTypes = {
   SERVICE: 'SERVICE'
 } as const;
 
+export const TimelineTypes = {
+  NOTE: 'NOTE',
+  CALL: 'CALL',
+  EMAIL: 'EMAIL',
+  MEETING: 'MEETING',
+  SYSTEM: 'SYSTEM'
+} as const;
+
 // Type definitions derived from enums
 export type UserRole = typeof UserRoles[keyof typeof UserRoles];
 export type AccountStatus = typeof AccountStatuses[keyof typeof AccountStatuses];
@@ -43,6 +51,7 @@ export type AccountType = typeof AccountTypes[keyof typeof AccountTypes];
 export type BusinessStage = typeof BusinessStages[keyof typeof BusinessStages];
 export type Currency = typeof Currencies[keyof typeof Currencies];
 export type ItemType = typeof ItemTypes[keyof typeof ItemTypes];
+export type TimelineType = typeof TimelineTypes[keyof typeof TimelineTypes];
 
 // Validation helper functions
 export const isValidUserRole = (value: string): value is UserRole => {
@@ -69,6 +78,10 @@ export const isValidItemType = (value: string): value is ItemType => {
   return Object.values(ItemTypes).includes(value as ItemType);
 };
 
+export const isValidTimelineType = (value: string): value is TimelineType => {
+  return Object.values(TimelineTypes).includes(value as TimelineType);
+};
+
 // User Interface (Database representation - snake_case)
 export interface UserDB {
   id: string;
@@ -79,12 +92,21 @@ export interface UserDB {
   created_at: string;
 }
 
+// Relationship object interfaces
+export interface UserReference {
+  id: string;
+}
+
+export interface AccountReference {
+  id: string;
+}
+
 // User Interface (API representation - camelCase)
 export interface User {
   id: string;
   name: string;
   role: string;
-  managerId?: string;
+  manager?: UserReference;
   email: string;
   createdAt: string;
 }
@@ -113,7 +135,7 @@ export interface Account {
   id: string;
   name: string;
   segment: string;
-  responsibleId: string;
+  responsible: UserReference;
   status: string;
   type: string;
   pipeline: string;
@@ -145,12 +167,12 @@ export interface BusinessDB {
 export interface Business {
   id: string;
   title: string;
-  accountId: string;
+  account: AccountReference;
   value: number;
   currency: string;
   stage: string;
   probability?: number;
-  ownerId?: string;
+  owner?: UserReference;
   closingDate?: string;
   createdAt: string;
 }
@@ -177,6 +199,30 @@ export interface Item {
   createdAt: string;
 }
 
+// AccountTimeline Interface (Database representation - snake_case)
+export interface AccountTimelineDB {
+  id: string;
+  account_id: string;
+  type: string;
+  title: string;
+  description?: string | null;
+  date: string;
+  created_by: string;
+  created_at: string;
+}
+
+// AccountTimeline Interface (API representation - camelCase)
+export interface AccountTimeline {
+  id: string;
+  account: AccountReference;
+  type: string;
+  title: string;
+  description?: string;
+  date: string;
+  createdBy: UserReference;
+  createdAt: string;
+}
+
 // Token Cache Interface
 export interface TokenCache {
   token: string;
@@ -199,7 +245,7 @@ export interface PaginatedResponse<T> {
 export interface CreateAccountRequest {
   name: string;
   segment: string;
-  responsibleId: string;
+  responsibleId: string; // Still accept ID for input
   email?: string;
   phone?: string;
   cnpj?: string;
@@ -211,7 +257,7 @@ export interface CreateAccountRequest {
 export interface UpdateAccountRequest {
   name?: string;
   segment?: string;
-  responsibleId?: string;
+  responsibleId?: string; // Still accept ID for input
   status?: string;
   type?: string;
   pipeline?: string;
@@ -225,37 +271,37 @@ export interface UpdateAccountRequest {
 
 export interface CreateBusinessRequest {
   title: string;
-  accountId: string;
+  accountId: string; // Still accept ID for input
   value: number;
   currency?: string;
   stage: string;
   probability?: number;
-  ownerId?: string;
+  ownerId?: string; // Still accept ID for input
   closingDate?: string;
 }
 
 export interface UpdateBusinessRequest {
   title?: string;
-  accountId?: string;
+  accountId?: string; // Still accept ID for input
   value?: number;
   currency?: string;
   stage?: string;
   probability?: number;
-  ownerId?: string;
+  ownerId?: string; // Still accept ID for input
   closingDate?: string | null;
 }
 
 export interface CreateUserRequest {
   name: string;
   role?: string;
-  managerId?: string;
+  managerId?: string; // Still accept ID for input
   email: string;
 }
 
 export interface UpdateUserRequest {
   name?: string;
   role?: string;
-  managerId?: string;
+  managerId?: string; // Still accept ID for input
   email?: string;
 }
 
@@ -293,12 +339,41 @@ export interface ItemQueryParams {
   size?: number;
 }
 
+export interface CreateAccountTimelineRequest {
+  accountId: string; // Still accept ID for input
+  type: string;
+  title: string;
+  description?: string;
+  date: string;
+  createdBy: string; // Still accept ID for input
+}
+
+export interface UpdateAccountTimelineRequest {
+  accountId?: string; // Still accept ID for input
+  type?: string;
+  title?: string;
+  description?: string | null;
+  date?: string;
+  createdBy?: string; // Still accept ID for input
+}
+
+export interface AccountTimelineQueryParams {
+  accountId?: string;
+  type?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  createdBy?: string;
+  page?: number;
+  size?: number;
+}
+
 // Default value helpers
 export const getDefaultUserRole = (): UserRole => UserRoles.SALES_REP;
 export const getDefaultAccountStatus = (): AccountStatus => AccountStatuses.ACTIVE;
 export const getDefaultAccountType = (): AccountType => AccountTypes.LEAD;
 export const getDefaultCurrency = (): Currency => Currencies.BRL;
 export const getDefaultItemType = (): ItemType => ItemTypes.PRODUCT;
+export const getDefaultTimelineType = (): TimelineType => TimelineTypes.NOTE;
 
 // Utility function to remove null and undefined fields from objects
 function removeNullUndefinedFields<T extends Record<string, any>>(obj: T): Partial<T> {
@@ -319,7 +394,7 @@ export function accountDbToApi(dbAccount: AccountDB): Account {
     id: dbAccount.id,
     name: dbAccount.name,
     segment: dbAccount.segment,
-    responsibleId: dbAccount.responsible_id,
+    responsible: { id: dbAccount.responsible_id },
     status: dbAccount.status,
     type: dbAccount.type,
     pipeline: dbAccount.pipeline,
@@ -359,12 +434,12 @@ export function businessDbToApi(dbBusiness: BusinessDB): Business {
   const business = {
     id: dbBusiness.id,
     title: dbBusiness.title,
-    accountId: dbBusiness.account_id,
+    account: { id: dbBusiness.account_id },
     value: dbBusiness.value,
     currency: dbBusiness.currency,
     stage: dbBusiness.stage,
     probability: dbBusiness.probability,
-    ownerId: dbBusiness.owner_id,
+    owner: dbBusiness.owner_id ? { id: dbBusiness.owner_id } : undefined,
     closingDate: dbBusiness.closing_date,
     createdAt: dbBusiness.created_at
   };
@@ -392,7 +467,7 @@ export function userDbToApi(dbUser: UserDB): User {
     id: dbUser.id,
     name: dbUser.name,
     role: dbUser.role,
-    managerId: dbUser.manager_id,
+    manager: dbUser.manager_id ? { id: dbUser.manager_id } : undefined,
     email: dbUser.email,
     createdAt: dbUser.created_at
   };
@@ -435,4 +510,32 @@ export function itemApiToDb(apiItem: CreateItemRequest | UpdateItemRequest): Par
   if ('description' in apiItem && apiItem.description !== undefined) dbItem.description = apiItem.description;
   
   return dbItem;
+}
+
+export function accountTimelineDbToApi(dbTimeline: AccountTimelineDB): AccountTimeline {
+  const timeline = {
+    id: dbTimeline.id,
+    account: { id: dbTimeline.account_id },
+    type: dbTimeline.type,
+    title: dbTimeline.title,
+    description: dbTimeline.description,
+    date: dbTimeline.date,
+    createdBy: { id: dbTimeline.created_by },
+    createdAt: dbTimeline.created_at
+  };
+  
+  return removeNullUndefinedFields(timeline) as AccountTimeline;
+}
+
+export function accountTimelineApiToDb(apiTimeline: CreateAccountTimelineRequest | UpdateAccountTimelineRequest): Partial<AccountTimelineDB> {
+  const dbTimeline: Partial<AccountTimelineDB> = {};
+  
+  if ('accountId' in apiTimeline && apiTimeline.accountId !== undefined) dbTimeline.account_id = apiTimeline.accountId;
+  if ('type' in apiTimeline && apiTimeline.type !== undefined) dbTimeline.type = apiTimeline.type;
+  if ('title' in apiTimeline && apiTimeline.title !== undefined) dbTimeline.title = apiTimeline.title;
+  if ('description' in apiTimeline && apiTimeline.description !== undefined) dbTimeline.description = apiTimeline.description;
+  if ('date' in apiTimeline && apiTimeline.date !== undefined) dbTimeline.date = apiTimeline.date;
+  if ('createdBy' in apiTimeline && apiTimeline.createdBy !== undefined) dbTimeline.created_by = apiTimeline.createdBy;
+  
+  return dbTimeline;
 }

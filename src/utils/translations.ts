@@ -19,6 +19,8 @@ export interface Translations {
       manager_not_found: string;
       user_not_found: string;
       business_not_found: string;
+      timeline_account_not_found: string;
+      timeline_creator_not_found: string;
       relationship_error: string;
     };
     constraints: {
@@ -34,6 +36,7 @@ export interface Translations {
       user: string;
       business: string;
       item: string;
+      timeline: string;
       route: string;
     };
     server: {
@@ -48,12 +51,15 @@ export interface Translations {
       user: string;
       business: string;
       item: string;
+      timeline: string;
     };
     created: {
       item: string;
+      timeline: string;
     };
     updated: {
       item: string;
+      timeline: string;
     };
   };
   fields: {
@@ -85,6 +91,16 @@ export interface Translations {
     price: string;
     skuCode: string;
     description: string;
+    // AccountTimeline fields
+    date: string;
+    createdBy: string;
+  };
+  timeline_types: {
+    NOTE: string;
+    CALL: string;
+    EMAIL: string;
+    MEETING: string;
+    SYSTEM: string;
   };
 }
 
@@ -107,6 +123,8 @@ const translations: Record<Language, Translations> = {
         manager_not_found: 'O gerente informado não existe',
         user_not_found: 'O usuário informado não existe',
         business_not_found: 'O negócio informado não existe',
+        timeline_account_not_found: 'A conta informada para o timeline não existe',
+        timeline_creator_not_found: 'O usuário criador do timeline não existe',
         relationship_error: 'Erro de relacionamento entre registros',
       },
       constraints: {
@@ -122,6 +140,7 @@ const translations: Record<Language, Translations> = {
         user: 'Usuário não encontrado',
         business: 'Negócio não encontrado',
         item: 'Item não encontrado',
+        timeline: 'Timeline não encontrado',
         route: 'Rota não encontrada',
       },
       server: {
@@ -136,12 +155,15 @@ const translations: Record<Language, Translations> = {
         user: 'Usuário excluído com sucesso',
         business: 'Negócio excluído com sucesso',
         item: 'Item excluído com sucesso',
+        timeline: 'Timeline excluído com sucesso',
       },
       created: {
         item: 'Item criado com sucesso',
+        timeline: 'Timeline criado com sucesso',
       },
       updated: {
         item: 'Item atualizado com sucesso',
+        timeline: 'Timeline atualizado com sucesso',
       },
     },
     fields: {
@@ -173,6 +195,16 @@ const translations: Record<Language, Translations> = {
       price: 'Preço',
       skuCode: 'Código SKU',
       description: 'Descrição',
+      // AccountTimeline fields
+      date: 'Data',
+      createdBy: 'Criado por',
+    },
+    timeline_types: {
+      NOTE: 'Nota',
+      CALL: 'Chamada',
+      EMAIL: 'Email',
+      MEETING: 'Reunião',
+      SYSTEM: 'Sistema',
     },
   },
   'en-US': {
@@ -193,6 +225,8 @@ const translations: Record<Language, Translations> = {
         manager_not_found: 'The specified manager does not exist',
         user_not_found: 'The specified user does not exist',
         business_not_found: 'The specified business does not exist',
+        timeline_account_not_found: 'The specified account for timeline does not exist',
+        timeline_creator_not_found: 'The specified timeline creator does not exist',
         relationship_error: 'Relationship error between records',
       },
       constraints: {
@@ -208,6 +242,7 @@ const translations: Record<Language, Translations> = {
         user: 'User not found',
         business: 'Business not found',
         item: 'Item not found',
+        timeline: 'Timeline not found',
         route: 'Route not found',
       },
       server: {
@@ -222,12 +257,15 @@ const translations: Record<Language, Translations> = {
         user: 'User deleted successfully',
         business: 'Business deleted successfully',
         item: 'Item deleted successfully',
+        timeline: 'Timeline deleted successfully',
       },
       created: {
         item: 'Item created successfully',
+        timeline: 'Timeline created successfully',
       },
       updated: {
         item: 'Item updated successfully',
+        timeline: 'Timeline updated successfully',
       },
     },
     fields: {
@@ -259,6 +297,16 @@ const translations: Record<Language, Translations> = {
       price: 'Price',
       skuCode: 'SKU Code',
       description: 'Description',
+      // AccountTimeline fields
+      date: 'Date',
+      createdBy: 'Created by',
+    },
+    timeline_types: {
+      NOTE: 'Note',
+      CALL: 'Call',
+      EMAIL: 'Email',
+      MEETING: 'Meeting',
+      SYSTEM: 'System',
     },
   },
   'es-CO': {
@@ -279,6 +327,8 @@ const translations: Record<Language, Translations> = {
         manager_not_found: 'El gerente especificado no existe',
         user_not_found: 'El usuario especificado no existe',
         business_not_found: 'El negocio especificado no existe',
+        timeline_account_not_found: 'La cuenta especificada para el timeline no existe',
+        timeline_creator_not_found: 'El usuario creador del timeline no existe',
         relationship_error: 'Error de relación entre registros',
       },
       constraints: {
@@ -294,6 +344,7 @@ const translations: Record<Language, Translations> = {
         user: 'Usuario no encontrado',
         business: 'Negocio no encontrado',
         item: 'Artículo no encontrado',
+        timeline: 'Timeline no encontrado',
         route: 'Ruta no encontrada',
       },
       server: {
@@ -308,12 +359,15 @@ const translations: Record<Language, Translations> = {
         user: 'Usuario eliminado exitosamente',
         business: 'Negocio eliminado exitosamente',
         item: 'Artículo eliminado exitosamente',
+        timeline: 'Timeline eliminado exitosamente',
       },
       created: {
         item: 'Artículo creado exitosamente',
+        timeline: 'Timeline creado exitosamente',
       },
       updated: {
         item: 'Artículo actualizado exitosamente',
+        timeline: 'Timeline actualizado exitosamente',
       },
     },
     fields: {
@@ -345,6 +399,16 @@ const translations: Record<Language, Translations> = {
       price: 'Precio',
       skuCode: 'Código SKU',
       description: 'Descripción',
+      // AccountTimeline fields
+      date: 'Fecha',
+      createdBy: 'Creado por',
+    },
+    timeline_types: {
+      NOTE: 'Nota',
+      CALL: 'Llamada',
+      EMAIL: 'Email',
+      MEETING: 'Reunión',
+      SYSTEM: 'Sistema',
     },
   },
 };
@@ -424,9 +488,15 @@ export function getRelationshipErrorMessage(
   if (errorDetails.includes('responsible_id') || errorDetails.includes('owner_id')) {
     return t.errors.relationships.owner_not_found;
   } else if (errorDetails.includes('account_id')) {
+    // Check if it's timeline-specific account relationship
+    if (errorDetails.includes('account_timeline')) {
+      return t.errors.relationships.timeline_account_not_found;
+    }
     return t.errors.relationships.account_not_found;
   } else if (errorDetails.includes('manager_id')) {
     return t.errors.relationships.manager_not_found;
+  } else if (errorDetails.includes('created_by')) {
+    return t.errors.relationships.timeline_creator_not_found;
   }
   
   return t.errors.relationships.relationship_error;
@@ -445,6 +515,8 @@ export function getNotFoundMessage(entityType: string, language: Language = 'pt-
       return t.errors.not_found.business;
     case 'item':
       return t.errors.not_found.item;
+    case 'timeline':
+      return t.errors.not_found.timeline;
     default:
       return t.errors.not_found.route;
   }
@@ -469,21 +541,60 @@ export function getSuccessMessage(
           return t.success.deleted.business;
         case 'item':
           return t.success.deleted.item;
+        case 'timeline':
+          return t.success.deleted.timeline;
       }
       break;
     case 'created':
       switch (entityType.toLowerCase()) {
         case 'item':
           return t.success.created.item;
+        case 'timeline':
+          return t.success.created.timeline;
       }
       break;
     case 'updated':
       switch (entityType.toLowerCase()) {
         case 'item':
           return t.success.updated.item;
+        case 'timeline':
+          return t.success.updated.timeline;
       }
       break;
   }
   
   return 'Operação realizada com sucesso';
+}
+
+// Função para traduzir tipos de timeline
+export function translateTimelineType(timelineType: string, language: Language = 'pt-BR'): string {
+  const t = getTranslations(language);
+  
+  switch (timelineType.toUpperCase()) {
+    case 'NOTE':
+      return t.timeline_types.NOTE;
+    case 'CALL':
+      return t.timeline_types.CALL;
+    case 'EMAIL':
+      return t.timeline_types.EMAIL;
+    case 'MEETING':
+      return t.timeline_types.MEETING;
+    case 'SYSTEM':
+      return t.timeline_types.SYSTEM;
+    default:
+      return timelineType;
+  }
+}
+
+// Função para obter mensagem de sucesso específica para timeline
+export function getTimelineSuccessMessage(
+  action: string, 
+  language: Language = 'pt-BR'
+): string {
+  return getSuccessMessage(action, 'timeline', language);
+}
+
+// Função para obter mensagem de erro "timeline não encontrado"
+export function getTimelineNotFoundMessage(language: Language = 'pt-BR'): string {
+  return getNotFoundMessage('timeline', language);
 }

@@ -127,9 +127,9 @@ export async function getAccounts(req: Request, res: Response): Promise<void> {
           decoded: decodedFilter 
         });
         
-        const parsedFilter = parseFilter(decodedFilter);
+        const parsedFilter = parseFilter(decodedFilter, 'account');
         logger.filterParsing(decodedFilter, true);
-        query = applyFiltersToQuery(query, parsedFilter);
+        query = applyFiltersToQuery(query, parsedFilter, 'account');
       }
     } catch (filterError) {
       let decodedFilter = '';

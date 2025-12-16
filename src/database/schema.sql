@@ -61,6 +61,19 @@ CREATE TABLE item
     created_at  TIMESTAMPTZ      DEFAULT NOW()
 );
 
+-- Create account_timeline table for tracking account interactions and changes (requirements 6.1, 6.2, 6.3, 6.4, 6.5)
+CREATE TABLE account_timeline
+(
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    account_id  UUID NOT NULL REFERENCES account (id) ON DELETE CASCADE,
+    type        TEXT NOT NULL,    -- NOTE, CALL, EMAIL, MEETING, SYSTEM (validated in application)
+    title       TEXT NOT NULL,
+    description TEXT,             -- Optional description
+    date        TIMESTAMPTZ NOT NULL,
+    created_by  UUID NOT NULL REFERENCES users (id),
+    created_at  TIMESTAMPTZ      DEFAULT NOW()
+);
+
 -- Create indexes for better query performance
 CREATE INDEX idx_account_responsible_id ON account (responsible_id);
 CREATE INDEX idx_account_status ON account (status);
@@ -75,3 +88,7 @@ CREATE INDEX idx_item_name ON item (name);
 CREATE INDEX idx_item_type ON item (type);
 CREATE INDEX idx_item_price ON item (price);
 CREATE INDEX idx_item_sku_code ON item (sku_code);
+CREATE INDEX idx_account_timeline_account_id ON account_timeline (account_id);
+CREATE INDEX idx_account_timeline_type ON account_timeline (type);
+CREATE INDEX idx_account_timeline_date ON account_timeline (date);
+CREATE INDEX idx_account_timeline_created_by ON account_timeline (created_by);

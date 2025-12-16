@@ -1,10 +1,10 @@
 // Test setup file for Jest
-// This file is run before each test suite
+// This file is run before all tests
 
 // Set test environment variables
 process.env.NODE_ENV = 'test';
 
-// Mock console methods to reduce noise during testing
+// Mock console methods to reduce noise during tests
 const originalConsoleError = console.error;
 const originalConsoleWarn = console.warn;
 

@@ -138,9 +138,9 @@ export async function getItems(req: Request, res: Response): Promise<void> {
           decoded: decodedFilter 
         });
         
-        const parsedFilter = parseFilter(decodedFilter);
+        const parsedFilter = parseFilter(decodedFilter, 'item');
         logger.filterParsing(decodedFilter, true);
-        query = applyFiltersToQuery(query, parsedFilter);
+        query = applyFiltersToQuery(query, parsedFilter, 'item');
       }
     } catch (filterError) {
       let decodedFilter = '';

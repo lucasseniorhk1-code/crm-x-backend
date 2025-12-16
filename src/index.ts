@@ -5,6 +5,7 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import accountRoutes from './routes/accountRoutes';
+import accountTimelineRoutes from './routes/accountTimelineRoutes';
 import userRoutes from './routes/userRoutes';
 import businessRoutes from './routes/businessRoutes';
 import itemRoutes from './routes/itemRoutes';
@@ -27,20 +28,25 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health-check', (req, res) => {
   res.status(200).json({ 
-    status: 'OK', 
-    message: 'CRM is running',
-    timestamp: new Date().toISOString(),
-    request_id: (req as any).requestId
+    status: 'OK'
   });
 });
 
 // API routes
-app.use('/api/accounts', accountRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/business', businessRoutes);
-app.use('/api/items', itemRoutes);
+const BASE_API = "/api/";
+const ACCOUNT_API = BASE_API.concat("accounts");
+const ACCOUNT_TIMELINE_API = BASE_API.concat("account-timeline");
+const USERS_API = BASE_API.concat("users");
+const BUSINESS_API = BASE_API.concat("business");
+const ITEMS_API = BASE_API.concat("items");
+
+app.use(ACCOUNT_API, accountRoutes);
+app.use(ACCOUNT_TIMELINE_API, accountTimelineRoutes);
+app.use(USERS_API, userRoutes);
+app.use(BUSINESS_API, businessRoutes);
+app.use(ITEMS_API, itemRoutes);
 
 // 404 handler for undefined routes
 app.use(notFoundHandler);
@@ -62,12 +68,13 @@ process.on('SIGINT', () => {
 // Start server
 app.listen(PORT, () => {
   logger.serverStart(Number(PORT));
-  logger.info('SERVER', `Health check available at http://localhost:${PORT}/health`);
+  logger.info('SERVER', `Health check available at /health`);
   logger.info('SERVER', `API endpoints available at:`);
-  logger.info('SERVER', `  - Accounts: http://localhost:${PORT}/api/accounts`);
-  logger.info('SERVER', `  - Users: http://localhost:${PORT}/api/users`);
-  logger.info('SERVER', `  - Business: http://localhost:${PORT}/api/business`);
-  logger.info('SERVER', `  - Items: http://localhost:${PORT}/api/items`);
+  logger.info('SERVER', `Accounts: ${ACCOUNT_API}`);
+  logger.info('SERVER', `Account Timeline: ${ACCOUNT_TIMELINE_API}`);
+  logger.info('SERVER', `Users: ${USERS_API}`);
+  logger.info('SERVER', `Business: ${BUSINESS_API}`);
+  logger.info('SERVER', `Items: ${ITEMS_API}`);
 });
 
 export default app;

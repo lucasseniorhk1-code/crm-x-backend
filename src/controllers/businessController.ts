@@ -112,8 +112,8 @@ export async function getBusiness(req: Request, res: Response): Promise<void> {
         }
         
         const { parseFilter, applyFiltersToQuery } = await import('../utils/filterParser');
-        const parsedFilter = parseFilter(decodedFilter);
-        query = applyFiltersToQuery(query, parsedFilter);
+        const parsedFilter = parseFilter(decodedFilter, 'business');
+        query = applyFiltersToQuery(query, parsedFilter, 'business');
       } catch (filterError) {
         handleFilterError(filterError, res, req);
         return;

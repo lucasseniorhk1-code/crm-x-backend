@@ -1,50 +1,118 @@
-import { AccountStatuses, AccountTypes, isValidAccountStatus, isValidAccountType } from '../types';
+import { 
+  AccountStatuses, 
+  AccountTypes, 
+  BusinessStages,
+  Currencies,
+  ItemTypes,
+  TimelineTypes,
+  UserRoles,
+  isValidAccountStatus, 
+  isValidAccountType,
+  isValidBusinessStage,
+  isValidCurrency,
+  isValidItemType,
+  isValidTimelineType,
+  isValidUserRole
+} from '../types';
 import { logger } from './logger';
 
-// Allowed fields for filtering
-const ALLOWED_FIELDS = {
-  // Account fields (snake_case for database)
-  'id': 'id',
-  'name': 'name',
-  'segment': 'segment',
-  'status': 'status',
-  'type': 'type',
-  'pipeline': 'pipeline',
-  'email': 'email',
-  'phone': 'phone',
-  'cnpj': 'cnpj',
-  'instagram': 'instagram',
-  'linkedin': 'linkedin',
-  'whatsapp': 'whatsapp',
-  'created_at': 'created_at',
-  'last_interaction': 'last_interaction',
-  'responsible_id': 'responsible_id',
+// Entity field mappings - defines allowed fields for each entity
+const ENTITY_FIELDS = {
+  // Account entity fields
+  account: {
+    'id': 'id',
+    'name': 'name',
+    'segment': 'segment',
+    'status': 'status',
+    'type': 'type',
+    'pipeline': 'pipeline',
+    'email': 'email',
+    'phone': 'phone',
+    'cnpj': 'cnpj',
+    'instagram': 'instagram',
+    'linkedin': 'linkedin',
+    'whatsapp': 'whatsapp',
+    'created_at': 'created_at',
+    'last_interaction': 'last_interaction',
+    'responsible_id': 'responsible_id',
+    // Relationships - now using object structure
+    'responsible.id': 'users!responsible_id.id',
+    'responsible.name': 'users!responsible_id.name',
+    'responsible.email': 'users!responsible_id.email',
+    'responsible.role': 'users!responsible_id.role'
+  },
   
-  // Business fields (snake_case for database)
-  'title': 'title',
-  'account_id': 'account_id',
-  'value': 'value',
-  'currency': 'currency',
-  'stage': 'stage',
-  'probability': 'probability',
-  'owner_id': 'owner_id',
-  'closing_date': 'closing_date',
+  // Business entity fields
+  business: {
+    'id': 'id',
+    'title': 'title',
+    'account_id': 'account_id',
+    'value': 'value',
+    'currency': 'currency',
+    'stage': 'stage',
+    'probability': 'probability',
+    'owner_id': 'owner_id',
+    'closing_date': 'closing_date',
+    'created_at': 'created_at',
+    // Relationships - now using object structure
+    'account.id': 'account!account_id.id',
+    'account.name': 'account!account_id.name',
+    'account.segment': 'account!account_id.segment',
+    'account.status': 'account!account_id.status',
+    'account.type': 'account!account_id.type',
+    'owner.id': 'users!owner_id.id',
+    'owner.name': 'users!owner_id.name',
+    'owner.email': 'users!owner_id.email',
+    'owner.role': 'users!owner_id.role'
+  },
   
-  // User fields (snake_case for database)
-  'role': 'role',
-  'manager_id': 'manager_id',
+  // User entity fields
+  users: {
+    'id': 'id',
+    'name': 'name',
+    'role': 'role',
+    'manager_id': 'manager_id',
+    'email': 'email',
+    'created_at': 'created_at',
+    // Relationships - now using object structure
+    'manager.id': 'users!manager_id.id',
+    'manager.name': 'users!manager_id.name',
+    'manager.email': 'users!manager_id.email',
+    'manager.role': 'users!manager_id.role'
+  },
   
-  // Owner relationship fields (will be handled with joins)
-  'owner.id': 'users.id',
-  'owner.name': 'users.name',
-  'owner.email': 'users.email',
-  'owner.role': 'users.role',
+  // Item entity fields
+  item: {
+    'id': 'id',
+    'name': 'name',
+    'type': 'type',
+    'price': 'price',
+    'sku_code': 'sku_code',
+    'description': 'description',
+    'created_at': 'created_at'
+  },
   
-  // Responsible relationship fields (will be handled with joins)
-  'responsible.id': 'users.id',
-  'responsible.name': 'users.name',
-  'responsible.email': 'users.email',
-  'responsible.role': 'users.role'
+  // Account Timeline entity fields
+  account_timeline: {
+    'id': 'id',
+    'account_id': 'account_id',
+    'type': 'type',
+    'title': 'title',
+    'description': 'description',
+    'date': 'date',
+    'created_by': 'created_by',
+    'created_at': 'created_at',
+    // Relationships - now using object structure
+    'account.id': 'account!account_id.id',
+    'account.name': 'account!account_id.name',
+    'account.segment': 'account!account_id.segment',
+    'account.status': 'account!account_id.status',
+    'account.type': 'account!account_id.type',
+    'createdBy.id': 'users!created_by.id',
+    'createdBy.name': 'users!created_by.name',
+    'createdBy.email': 'users!created_by.email',
+    'createdBy.role': 'users!created_by.role'
+  }
 } as const;
 
 // Allowed operators
@@ -62,7 +130,8 @@ interface FilterCondition {
 
 interface ParsedFilter {
   conditions: FilterCondition[];
-  hasOwnerFilter: boolean;
+  hasRelationshipFilter: boolean;
+  relationshipFields: Set<string>;
 }
 
 /**
@@ -87,26 +156,50 @@ function sanitizeValue(value: string): string {
 }
 
 /**
- * Validates field values based on their type
+ * Validates field values based on their type and entity context
  */
-function validateFieldValue(field: string, value: string): boolean {
-  switch (field) {
+function validateFieldValue(field: string, value: string, entity?: string): boolean {
+  // Extract base field name (remove relationship prefix)
+  const baseField = field.includes('.') ? field.split('.')[1] : field;
+  
+  // UUID validation for ID fields
+  if (baseField === 'id' || field.endsWith('_id')) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(value);
+  }
+  
+  // Email validation
+  if (baseField === 'email') {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(value);
+  }
+  
+  // Enum validations based on field name
+  switch (baseField) {
     case 'status':
       return isValidAccountStatus(value);
     case 'type':
-      return isValidAccountType(value);
-    case 'id':
-    case 'owner.id':
-    case 'responsible.id':
-      // UUID validation
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-      return uuidRegex.test(value);
-    case 'email':
-    case 'owner.email':
-    case 'responsible.email':
-      // Basic email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(value);
+      if (entity === 'account') return isValidAccountType(value);
+      if (entity === 'item') return isValidItemType(value);
+      if (entity === 'account_timeline') return isValidTimelineType(value);
+      return true;
+    case 'role':
+      return isValidUserRole(value);
+    case 'stage':
+      return isValidBusinessStage(value);
+    case 'currency':
+      return isValidCurrency(value);
+    case 'price':
+    case 'value':
+    case 'probability':
+      // Numeric validation
+      return !isNaN(Number(value)) && Number(value) >= 0;
+    case 'date':
+    case 'closing_date':
+    case 'created_at':
+    case 'last_interaction':
+      // ISO date validation
+      return !isNaN(Date.parse(value));
     default:
       // For other fields, just check it's not empty and doesn't contain dangerous patterns
       return value.length > 0 && !/[<>{}]/.test(value);
@@ -117,13 +210,14 @@ function validateFieldValue(field: string, value: string): boolean {
  * Parses a filter string into structured conditions
  * Example: "status = 'ACTIVE' AND type = 'Lead' OR owner.name = 'Lucas'"
  */
-export function parseFilter(filterString: string): ParsedFilter {
+export function parseFilter(filterString: string, entity?: string): ParsedFilter {
   if (!filterString || filterString.trim() === '') {
-    return { conditions: [], hasOwnerFilter: false };
+    return { conditions: [], hasRelationshipFilter: false, relationshipFields: new Set() };
   }
 
   const conditions: FilterCondition[] = [];
-  let hasOwnerFilter = false;
+  let hasRelationshipFilter = false;
+  const relationshipFields = new Set<string>();
 
   // More robust parsing that handles quoted values properly
   const parseConditions = (str: string): string[] => {
@@ -185,9 +279,18 @@ export function parseFilter(filterString: string): ParsedFilter {
 
     const [, fieldName, operator, valueStr] = conditionMatch;
 
-    // Validate field name
-    if (!(fieldName in ALLOWED_FIELDS)) {
-      throw new Error(`Invalid field: ${fieldName}. Allowed fields: ${Object.keys(ALLOWED_FIELDS).join(', ')}`);
+    // Validate field name against entity fields
+    const entityFields = entity ? ENTITY_FIELDS[entity as keyof typeof ENTITY_FIELDS] : null;
+    if (entityFields && !(fieldName in entityFields)) {
+      throw new Error(`Invalid field: ${fieldName} for entity ${entity}. Allowed fields: ${Object.keys(entityFields).join(', ')}`);
+    }
+    
+    // If no entity specified, check if field exists in any entity (for backward compatibility)
+    if (!entityFields) {
+      const fieldExists = Object.values(ENTITY_FIELDS).some(fields => fieldName in fields);
+      if (!fieldExists) {
+        throw new Error(`Invalid field: ${fieldName}. Field not found in any entity.`);
+      }
     }
 
     // Validate operator
@@ -211,7 +314,7 @@ export function parseFilter(filterString: string): ParsedFilter {
           const trimmed = v.trim().replace(/^['"]|['"]$/g, ''); // Remove quotes
           const sanitized = sanitizeValue(trimmed);
           
-          if (!validateFieldValue(fieldName, sanitized)) {
+          if (!validateFieldValue(fieldName, sanitized, entity)) {
             throw new Error(`Invalid value for field ${fieldName}: ${sanitized}`);
           }
           
@@ -222,16 +325,18 @@ export function parseFilter(filterString: string): ParsedFilter {
       const singleValue = valueStr.replace(/^['"]|['"]$/g, ''); // Remove quotes
       const sanitized = sanitizeValue(singleValue);
       
-      if (!validateFieldValue(fieldName, sanitized)) {
+      if (!validateFieldValue(fieldName, sanitized, entity)) {
         throw new Error(`Invalid value for field ${fieldName}: ${sanitized}`);
       }
       
       value = sanitized;
     }
 
-    // Check if this is an owner or responsible filter
-    if (fieldName.startsWith('owner.') || fieldName.startsWith('responsible.')) {
-      hasOwnerFilter = true;
+    // Check if this is a relationship filter
+    if (fieldName.includes('.')) {
+      hasRelationshipFilter = true;
+      const relationshipName = fieldName.split('.')[0];
+      relationshipFields.add(relationshipName);
     }
 
     conditions.push({
@@ -245,81 +350,123 @@ export function parseFilter(filterString: string): ParsedFilter {
     currentLogicalOperator = undefined;
   }
 
-  return { conditions, hasOwnerFilter };
+  return { conditions, hasRelationshipFilter, relationshipFields };
 }
 
 /**
  * Converts parsed filter conditions to Supabase query filters
+ * Uses advanced filter parser for relationship filters
  */
-export function applyFiltersToQuery(query: any, parsedFilter: ParsedFilter): any {
+export function applyFiltersToQuery(query: any, parsedFilter: ParsedFilter, entity?: string): any {
   if (parsedFilter.conditions.length === 0) {
     return query;
   }
 
-  // If we have owner filters, we need to join with users table
-  if (parsedFilter.hasOwnerFilter) {
-    query = query.select(`
-      *,
-      users!responsible_id (
-        id,
-        name,
-        email,
-        role
-      )
-    `);
+  // If we have relationship filters, use the advanced parser
+  if (parsedFilter.hasRelationshipFilter) {
+    const { parseAdvancedFilter, applyAdvancedFiltersToQuery } = require('./advancedFilterParser');
+    
+    // Convert conditions back to filter string for advanced parsing
+    const filterString = parsedFilter.conditions.map(condition => {
+      let valueStr = '';
+      if (Array.isArray(condition.value)) {
+        valueStr = `(${condition.value.map(v => `'${v}'`).join(',')})`;
+      } else {
+        valueStr = `'${condition.value}'`;
+      }
+      
+      let conditionStr = `${condition.field} ${condition.operator} ${valueStr}`;
+      if (condition.logicalOperator) {
+        conditionStr = `${condition.logicalOperator} ${conditionStr}`;
+      }
+      return conditionStr;
+    }).join(' ');
+    
+    const advancedFilter = parseAdvancedFilter(filterString, entity);
+    return applyAdvancedFiltersToQuery(query, advancedFilter, entity);
   }
 
-  // Apply each condition sequentially for simplicity
-  for (const condition of parsedFilter.conditions) {
-    const dbField = ALLOWED_FIELDS[condition.field as keyof typeof ALLOWED_FIELDS];
+  const entityFields = entity ? ENTITY_FIELDS[entity as keyof typeof ENTITY_FIELDS] : null;
 
-    if (condition.field.startsWith('owner.') || condition.field.startsWith('responsible.')) {
-      // Handle owner/responsible relationship filters - skip for now as they're complex
-      logger.warn('FILTER', 'Owner/responsible filters not yet implemented', { field: condition.field });
+  // Apply each condition for direct fields only
+  for (const condition of parsedFilter.conditions) {
+    let dbField: string;
+    
+    if (entityFields && condition.field in entityFields) {
+      dbField = entityFields[condition.field as keyof typeof entityFields];
+    } else {
+      // Fallback: use field name as-is for direct fields
+      dbField = condition.field;
+    }
+
+    // Skip relationship filters (handled by advanced parser)
+    if (condition.field.includes('.')) {
       continue;
     }
 
     // Handle direct field filters
-    switch (condition.operator) {
-      case '=':
-        query = query.eq(dbField, condition.value);
-        break;
-      case '!=':
-      case '<>':
-        query = query.neq(dbField, condition.value);
-        break;
-      case '<':
-        query = query.lt(dbField, condition.value);
-        break;
-      case '>':
-        query = query.gt(dbField, condition.value);
-        break;
-      case '<=':
-        query = query.lte(dbField, condition.value);
-        break;
-      case '>=':
-        query = query.gte(dbField, condition.value);
-        break;
-      case 'LIKE':
-        // For LIKE, use the value as-is (user provides the % wildcards)
-        query = query.like(dbField, condition.value as string);
-        break;
-      case 'ILIKE':
-        // For ILIKE, use the value as-is (user provides the % wildcards)
-        query = query.ilike(dbField, condition.value as string);
-        break;
-      case 'IN':
-        if (Array.isArray(condition.value)) {
-          query = query.in(dbField, condition.value);
-        }
-        break;
-      case 'NOT IN':
-        if (Array.isArray(condition.value)) {
-          query = query.not(dbField, 'in', condition.value);
-        }
-        break;
+    try {
+      switch (condition.operator) {
+        case '=':
+          query = query.eq(dbField, condition.value);
+          break;
+        case '!=':
+        case '<>':
+          query = query.neq(dbField, condition.value);
+          break;
+        case '<':
+          query = query.lt(dbField, condition.value);
+          break;
+        case '>':
+          query = query.gt(dbField, condition.value);
+          break;
+        case '<=':
+          query = query.lte(dbField, condition.value);
+          break;
+        case '>=':
+          query = query.gte(dbField, condition.value);
+          break;
+        case 'LIKE':
+          query = query.like(dbField, condition.value as string);
+          break;
+        case 'ILIKE':
+          query = query.ilike(dbField, condition.value as string);
+          break;
+        case 'IN':
+          if (Array.isArray(condition.value)) {
+            query = query.in(dbField, condition.value);
+          }
+          break;
+        case 'NOT IN':
+          if (Array.isArray(condition.value)) {
+            query = query.not(dbField, 'in', condition.value);
+          }
+          break;
+      }
+    } catch (error) {
+      logger.error('FILTER', 'Error applying filter condition', error as Error, { 
+        filterField: condition.field,
+        operator: condition.operator,
+        value: condition.value
+      });
+      throw new Error(`Failed to apply filter for field ${condition.field}: ${(error as Error).message}`);
     }
   }
 
   return query;
+}
+
+/**
+ * Helper function to get entity name from table name
+ */
+export function getEntityFromTable(tableName: string): string {
+  const tableToEntity: Record<string, string> = {
+    'account': 'account',
+    'business': 'business', 
+    'users': 'users',
+    'item': 'item',
+    'account_timeline': 'account_timeline'
+  };
+  
+  return tableToEntity[tableName] || tableName;
 }

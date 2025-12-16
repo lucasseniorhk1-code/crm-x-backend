@@ -26,7 +26,7 @@ class Logger {
   private formatLogEntry(entry: LogEntry): string {
     const { timestamp, level, module, message, data, error } = entry;
     
-    let logMessage = `[${timestamp}] ${level} [${module}] ${message}`;
+    let logMessage = `[${timestamp}] ${level} [${module}] | ${message}`;
     
     if (data) {
       logMessage += ` | Data: ${JSON.stringify(data)}`;

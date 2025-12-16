@@ -112,8 +112,8 @@ export async function getUsers(req: Request, res: Response): Promise<void> {
         }
         
         const { parseFilter, applyFiltersToQuery } = await import('../utils/filterParser');
-        const parsedFilter = parseFilter(decodedFilter);
-        query = applyFiltersToQuery(query, parsedFilter);
+        const parsedFilter = parseFilter(decodedFilter, 'users');
+        query = applyFiltersToQuery(query, parsedFilter, 'users');
       } catch (filterError) {
         handleFilterError(filterError, res, req);
         return;
