@@ -441,6 +441,7 @@ export interface SalesByResponsibleResponse {
   responsibleId: string;
   responsibleName: string;
   saleValue: number;
+  closedDealsCount: number;
 }
 
 // Month name translation types (implementation in translations.ts)

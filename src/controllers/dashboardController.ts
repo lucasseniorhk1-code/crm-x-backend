@@ -122,8 +122,8 @@ export async function getMoreSalesByResponsible(req: Request, res: Response): Pr
       return;
     }
 
-    // Process the data to aggregate sales values by responsible user
-    const userSalesMap = new Map<string, { id: string; name: string; totalValue: number }>();
+    // Process the data to aggregate sales values and count deals by responsible user
+    const userSalesMap = new Map<string, { id: string; name: string; totalValue: number; dealsCount: number }>();
 
     if (businessData && businessData.length > 0) {
       businessData.forEach((business: any) => {
@@ -135,12 +135,14 @@ export async function getMoreSalesByResponsible(req: Request, res: Response): Pr
             userSalesMap.set(userId, {
               id: userId,
               name: userName,
-              totalValue: 0
+              totalValue: 0,
+              dealsCount: 0
             });
           }
 
           const currentUser = userSalesMap.get(userId)!;
           currentUser.totalValue += business.value || 0;
+          currentUser.dealsCount += 1; // Count each closed deal
         }
       });
     }
@@ -152,7 +154,8 @@ export async function getMoreSalesByResponsible(req: Request, res: Response): Pr
       .map(user => ({
         responsibleId: user.id,
         responsibleName: user.name,
-        saleValue: user.totalValue
+        saleValue: user.totalValue,
+        closedDealsCount: user.dealsCount
       }));
 
     // Return formatted response

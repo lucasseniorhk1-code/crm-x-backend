@@ -232,6 +232,12 @@ export function applyAdvancedFiltersToQuery(query: any, parsedFilter: AdvancedPa
         case 'business':
           foreignTableReference = 'business!business_id';
           break;
+        case 'proposal':
+          foreignTableReference = 'business_proposal!proposal_id';
+          break;
+        case 'item':
+          foreignTableReference = 'item!item_id';
+          break;
         default:
           logger.warn('FILTER', 'Unknown relationship', { relationshipName });
           continue;
@@ -261,6 +267,30 @@ export function applyAdvancedFiltersToQuery(query: any, parsedFilter: AdvancedPa
               filterField = 'business_id'; // Use the foreign key column directly
             } else {
               // For other business fields, we would need to join, but for now focus on ID
+              logger.warn('FILTER', 'Non-ID relationship filters not yet supported', { 
+                relationshipName, 
+                fieldName: filter.fieldName 
+              });
+              continue;
+            }
+            break;
+          case 'proposal':
+            if (filter.fieldName === 'id') {
+              filterField = 'proposal_id'; // Use the foreign key column directly
+            } else {
+              // For other proposal fields, we would need to join, but for now focus on ID
+              logger.warn('FILTER', 'Non-ID relationship filters not yet supported', { 
+                relationshipName, 
+                fieldName: filter.fieldName 
+              });
+              continue;
+            }
+            break;
+          case 'item':
+            if (filter.fieldName === 'id') {
+              filterField = 'item_id'; // Use the foreign key column directly
+            } else {
+              // For other item fields, we would need to join, but for now focus on ID
               logger.warn('FILTER', 'Non-ID relationship filters not yet supported', { 
                 relationshipName, 
                 fieldName: filter.fieldName 

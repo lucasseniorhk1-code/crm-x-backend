@@ -42,7 +42,8 @@ export const MoreSalesByResponsibleResponseSchema = z.array(
   z.object({
     responsibleId: z.string().min(1, 'Responsible ID cannot be empty'),
     responsibleName: z.string().min(1, 'Responsible name cannot be empty'),
-    saleValue: z.number().min(0, 'Sale value cannot be negative')
+    saleValue: z.number().min(0, 'Sale value cannot be negative'),
+    closedDealsCount: z.number().int().min(0, 'Closed deals count cannot be negative')
   })
 );
 
