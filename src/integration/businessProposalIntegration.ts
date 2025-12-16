@@ -118,7 +118,6 @@ export async function integratedProposalCreation(proposalData: any, requestId?: 
 
       // 3. Convert to API format
       const apiProposal = businessProposalDbToApi(createdProposal);
-      apiProposal.items = createdItems.map(businessProposalItemDbToApi);
 
       logger.proposalOperation('INTEGRATION_CREATE_SUCCESS', createdProposal.id, proposalData.responsibleId, {
         operationId,
@@ -213,7 +212,6 @@ export async function integratedProposalUpdate(proposalId: string, updateData: a
 
     // 4. Convert to API format
     const apiProposal = businessProposalDbToApi(updatedProposal as BusinessProposalDB);
-    apiProposal.items = (items as BusinessProposalItemDB[] || []).map(businessProposalItemDbToApi);
 
     logger.proposalOperation('INTEGRATION_UPDATE_SUCCESS', proposalId, updateData.responsibleId, {
       operationId,
