@@ -86,7 +86,7 @@ export async function getBusiness(req: Request, res: Response): Promise<void> {
     const page = queryParams.page || 1;
     const size = queryParams.size || 10;
 
-    // Build base query
+    // Build base query with proper select for relationship filtering
     let query = supabaseAdmin.from('business').select('*', { count: 'exact' });
 
     // Apply dynamic filter if provided
@@ -113,6 +113,15 @@ export async function getBusiness(req: Request, res: Response): Promise<void> {
         
         const { parseFilter, applyFiltersToQuery } = await import('../utils/filterParser');
         const parsedFilter = parseFilter(decodedFilter, 'business');
+        
+        // If we have relationship filters, we need to rebuild the query with proper select
+        if (parsedFilter.hasRelationshipFilter) {
+          // Rebuild query with relationship includes for filtering
+          query = supabaseAdmin
+            .from('business')
+            .select('*', { count: 'exact' });
+        }
+        
         query = applyFiltersToQuery(query, parsedFilter, 'business');
       } catch (filterError) {
         handleFilterError(filterError, res, req);

@@ -204,10 +204,6 @@ export function applyAdvancedFiltersToQuery(query: any, parsedFilter: AdvancedPa
 
   // Handle relationship filters using PostgREST syntax
   if (parsedFilter.hasRelationshipFilter) {
-    // Build select clause with relationships
-    const selectFields = ['*'];
-    const relationshipSelects = new Set<string>();
-
     // Group relationship filters by relationship name
     const relationshipGroups = new Map<string, RelationshipFilter[]>();
     
@@ -218,100 +214,129 @@ export function applyAdvancedFiltersToQuery(query: any, parsedFilter: AdvancedPa
       relationshipGroups.get(relFilter.relationshipName)!.push(relFilter);
     }
 
-    // Build relationship selects and filters
+    // Apply relationship filters using PostgREST foreign table syntax
     for (const [relationshipName, filters] of relationshipGroups) {
-      let relationshipSelect = '';
-      let relationshipTable = '';
-      let foreignKey = '';
+      let foreignTableReference = '';
 
-      // Map relationship names to table and foreign key
+      // Map relationship names to foreign table references
       switch (relationshipName) {
         case 'responsible':
-          relationshipTable = 'users';
-          foreignKey = 'responsible_id';
-          relationshipSelect = 'users!responsible_id(id,name,username,email,role)';
+          foreignTableReference = 'users!responsible_id';
           break;
         case 'manager':
-          relationshipTable = 'users';
-          foreignKey = 'manager_id';
-          relationshipSelect = 'users!manager_id(id,name,username,email,role)';
+          foreignTableReference = 'users!manager_id';
           break;
         case 'account':
-          relationshipTable = 'account';
-          foreignKey = 'account_id';
-          relationshipSelect = 'account!account_id(id,name,segment,status,type)';
-          break;
-        case 'responsible':
-          relationshipTable = 'users';
-          foreignKey = 'responsible_id';
-          relationshipSelect = 'users!responsible_id(id,name,email,role)';
+          foreignTableReference = 'account!account_id';
           break;
         default:
           logger.warn('FILTER', 'Unknown relationship', { relationshipName });
           continue;
       }
 
-      relationshipSelects.add(relationshipSelect);
-
-      // Apply relationship filters using PostgREST syntax
+      // Apply relationship filters using the correct PostgREST syntax
       for (const filter of filters) {
-        const relationshipFilterField = `${relationshipTable}.${filter.fieldName}`;
+        // For relationship filters, we need to use the foreign key field directly
+        let filterField = '';
+        
+        // Map relationship field to the actual foreign key column
+        switch (relationshipName) {
+          case 'account':
+            if (filter.fieldName === 'id') {
+              filterField = 'account_id'; // Use the foreign key column directly
+            } else {
+              // For other account fields, we would need to join, but for now focus on ID
+              logger.warn('FILTER', 'Non-ID relationship filters not yet supported', { 
+                relationshipName, 
+                fieldName: filter.fieldName 
+              });
+              continue;
+            }
+            break;
+          case 'responsible':
+            if (filter.fieldName === 'id') {
+              filterField = 'responsible_id';
+            } else {
+              logger.warn('FILTER', 'Non-ID relationship filters not yet supported', { 
+                relationshipName, 
+                fieldName: filter.fieldName 
+              });
+              continue;
+            }
+            break;
+          case 'manager':
+            if (filter.fieldName === 'id') {
+              filterField = 'manager_id';
+            } else {
+              logger.warn('FILTER', 'Non-ID relationship filters not yet supported', { 
+                relationshipName, 
+                fieldName: filter.fieldName 
+              });
+              continue;
+            }
+            break;
+          default:
+            logger.warn('FILTER', 'Unknown relationship', { relationshipName });
+            continue;
+        }
         
         try {
-          switch (filter.operator) {
-            case '=':
-              query = query.eq(relationshipFilterField, filter.value);
-              break;
-            case '!=':
-            case '<>':
-              query = query.neq(relationshipFilterField, filter.value);
-              break;
-            case '<':
-              query = query.lt(relationshipFilterField, filter.value);
-              break;
-            case '>':
-              query = query.gt(relationshipFilterField, filter.value);
-              break;
-            case '<=':
-              query = query.lte(relationshipFilterField, filter.value);
-              break;
-            case '>=':
-              query = query.gte(relationshipFilterField, filter.value);
-              break;
-            case 'LIKE':
-              query = query.like(relationshipFilterField, filter.value as string);
-              break;
-            case 'ILIKE':
-              query = query.ilike(relationshipFilterField, filter.value as string);
-              break;
-            case 'IN':
-              if (Array.isArray(filter.value)) {
-                query = query.in(relationshipFilterField, filter.value);
-              }
-              break;
-            case 'NOT IN':
-              if (Array.isArray(filter.value)) {
-                query = query.not(relationshipFilterField, 'in', filter.value);
-              }
-              break;
-          }
-        } catch (error) {
-          logger.warn('FILTER', 'Relationship filter may not be supported by PostgREST', { 
+          logger.info('FILTER', 'Applying relationship filter', { 
             relationshipName,
             field: filter.fieldName,
             operator: filter.operator,
             value: filter.value,
-            error: (error as Error).message
+            filterField
           });
-          // Continue with other filters even if this one fails
+
+          switch (filter.operator) {
+            case '=':
+              query = query.eq(filterField, filter.value);
+              break;
+            case '!=':
+            case '<>':
+              query = query.neq(filterField, filter.value);
+              break;
+            case '<':
+              query = query.lt(filterField, filter.value);
+              break;
+            case '>':
+              query = query.gt(filterField, filter.value);
+              break;
+            case '<=':
+              query = query.lte(filterField, filter.value);
+              break;
+            case '>=':
+              query = query.gte(filterField, filter.value);
+              break;
+            case 'LIKE':
+              query = query.like(filterField, filter.value as string);
+              break;
+            case 'ILIKE':
+              query = query.ilike(filterField, filter.value as string);
+              break;
+            case 'IN':
+              if (Array.isArray(filter.value)) {
+                query = query.in(filterField, filter.value);
+              }
+              break;
+            case 'NOT IN':
+              if (Array.isArray(filter.value)) {
+                query = query.not(filterField, 'in', filter.value);
+              }
+              break;
+          }
+        } catch (error) {
+          logger.error('FILTER', 'Error applying relationship filter', error as Error, { 
+            relationshipName,
+            field: filter.fieldName,
+            operator: filter.operator,
+            value: filter.value,
+            filterField
+          });
+          throw new Error(`Failed to apply relationship filter ${relationshipName}.${filter.fieldName}: ${(error as Error).message}`);
         }
       }
-    }
-
-    // Update select clause if we have relationship filters
-    if (relationshipSelects.size > 0) {
-      selectFields.push(...Array.from(relationshipSelects));
-      query = query.select(selectFields.join(','), { count: 'exact' });
     }
   }
 

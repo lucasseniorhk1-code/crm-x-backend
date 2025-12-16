@@ -17,7 +17,7 @@ import {
 import { logger } from './logger';
 
 // Entity field mappings - defines allowed fields for each entity
-const ENTITY_FIELDS = {
+export const ENTITY_FIELDS = {
   // Account entity fields
   account: {
     'id': 'id',
@@ -372,7 +372,7 @@ export function applyFiltersToQuery(query: any, parsedFilter: ParsedFilter, enti
     const { parseAdvancedFilter, applyAdvancedFiltersToQuery } = require('./advancedFilterParser');
     
     // Convert conditions back to filter string for advanced parsing
-    const filterString = parsedFilter.conditions.map(condition => {
+    const filterString = parsedFilter.conditions.map((condition, index) => {
       let valueStr = '';
       if (Array.isArray(condition.value)) {
         valueStr = `(${condition.value.map(v => `'${v}'`).join(',')})`;
@@ -381,7 +381,9 @@ export function applyFiltersToQuery(query: any, parsedFilter: ParsedFilter, enti
       }
       
       let conditionStr = `${condition.field} ${condition.operator} ${valueStr}`;
-      if (condition.logicalOperator) {
+      
+      // Add logical operator before the condition (except for the first one)
+      if (index > 0 && condition.logicalOperator) {
         conditionStr = `${condition.logicalOperator} ${conditionStr}`;
       }
       return conditionStr;
