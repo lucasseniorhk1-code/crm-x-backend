@@ -117,6 +117,32 @@ export const ENTITY_FIELDS = {
     'responsible.username': 'users!responsible_id.username',
     'responsible.email': 'users!responsible_id.email',
     'responsible.role': 'users!responsible_id.role'
+  },
+  
+  // Business Proposal entity fields
+  business_proposal: {
+    'id': 'id',
+    'business_id': 'business_id',
+    'responsible_id': 'responsible_id',
+    'title': 'title',
+    'status': 'status',
+    'date': 'date',
+    'value': 'value',
+    'content': 'content',
+    'theme_color': 'theme_color',
+    'terms_and_conditions': 'terms_and_conditions',
+    'show_unit_prices': 'show_unit_prices',
+    'created_at': 'created_at',
+    // Relationships - now using object structure
+    'business.id': 'business!business_id.id',
+    'business.title': 'business!business_id.title',
+    'business.value': 'business!business_id.value',
+    'business.stage': 'business!business_id.stage',
+    'responsible.id': 'users!responsible_id.id',
+    'responsible.name': 'users!responsible_id.name',
+    'responsible.username': 'users!responsible_id.username',
+    'responsible.email': 'users!responsible_id.email',
+    'responsible.role': 'users!responsible_id.role'
   }
 } as const;
 

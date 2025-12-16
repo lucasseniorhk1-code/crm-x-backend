@@ -229,6 +229,9 @@ export function applyAdvancedFiltersToQuery(query: any, parsedFilter: AdvancedPa
         case 'account':
           foreignTableReference = 'account!account_id';
           break;
+        case 'business':
+          foreignTableReference = 'business!business_id';
+          break;
         default:
           logger.warn('FILTER', 'Unknown relationship', { relationshipName });
           continue;
@@ -246,6 +249,18 @@ export function applyAdvancedFiltersToQuery(query: any, parsedFilter: AdvancedPa
               filterField = 'account_id'; // Use the foreign key column directly
             } else {
               // For other account fields, we would need to join, but for now focus on ID
+              logger.warn('FILTER', 'Non-ID relationship filters not yet supported', { 
+                relationshipName, 
+                fieldName: filter.fieldName 
+              });
+              continue;
+            }
+            break;
+          case 'business':
+            if (filter.fieldName === 'id') {
+              filterField = 'business_id'; // Use the foreign key column directly
+            } else {
+              // For other business fields, we would need to join, but for now focus on ID
               logger.warn('FILTER', 'Non-ID relationship filters not yet supported', { 
                 relationshipName, 
                 fieldName: filter.fieldName 
