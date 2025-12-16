@@ -229,17 +229,12 @@ export function applyAdvancedFiltersToQuery(query: any, parsedFilter: AdvancedPa
         case 'responsible':
           relationshipTable = 'users';
           foreignKey = 'responsible_id';
-          relationshipSelect = 'users!responsible_id(id,name,email,role)';
-          break;
-        case 'responsible':
-          relationshipTable = 'users';
-          foreignKey = 'responsible_id';
-          relationshipSelect = 'users!responsible_id(id,name,email,role)';
+          relationshipSelect = 'users!responsible_id(id,name,username,email,role)';
           break;
         case 'manager':
           relationshipTable = 'users';
           foreignKey = 'manager_id';
-          relationshipSelect = 'users!manager_id(id,name,email,role)';
+          relationshipSelect = 'users!manager_id(id,name,username,email,role)';
           break;
         case 'account':
           relationshipTable = 'account';

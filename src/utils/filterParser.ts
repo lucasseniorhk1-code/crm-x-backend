@@ -38,6 +38,7 @@ const ENTITY_FIELDS = {
     // Relationships - now using object structure
     'responsible.id': 'users!responsible_id.id',
     'responsible.name': 'users!responsible_id.name',
+    'responsible.username': 'users!responsible_id.username',
     'responsible.email': 'users!responsible_id.email',
     'responsible.role': 'users!responsible_id.role'
   },
@@ -62,6 +63,7 @@ const ENTITY_FIELDS = {
     'account.type': 'account!account_id.type',
     'responsible.id': 'users!responsible_id.id',
     'responsible.name': 'users!responsible_id.name',
+    'responsible.username': 'users!responsible_id.username',
     'responsible.email': 'users!responsible_id.email',
     'responsible.role': 'users!responsible_id.role'
   },
@@ -70,6 +72,7 @@ const ENTITY_FIELDS = {
   users: {
     'id': 'id',
     'name': 'name',
+    'username': 'username',
     'role': 'role',
     'manager_id': 'manager_id',
     'email': 'email',
@@ -77,6 +80,7 @@ const ENTITY_FIELDS = {
     // Relationships - now using object structure
     'manager.id': 'users!manager_id.id',
     'manager.name': 'users!manager_id.name',
+    'manager.username': 'users!manager_id.username',
     'manager.email': 'users!manager_id.email',
     'manager.role': 'users!manager_id.role'
   },
@@ -110,6 +114,7 @@ const ENTITY_FIELDS = {
     'account.type': 'account!account_id.type',
     'responsible.id': 'users!responsible_id.id',
     'responsible.name': 'users!responsible_id.name',
+    'responsible.username': 'users!responsible_id.username',
     'responsible.email': 'users!responsible_id.email',
     'responsible.role': 'users!responsible_id.role'
   }
