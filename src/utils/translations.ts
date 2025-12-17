@@ -12,6 +12,8 @@ export interface Translations {
       max_length: string;
       invalid_number: string;
       invalid_date: string;
+      invalid_enum: string;
+      invalid_username: string;
     };
     relationships: {
       owner_not_found: string;
@@ -131,6 +133,39 @@ export interface Translations {
     MEETING: string;
     SYSTEM: string;
   };
+  enum_values: {
+    user_roles: {
+      ADMIN: string;
+      MANAGER: string;
+      SALES_REP: string;
+    };
+    account_statuses: {
+      ACTIVE: string;
+      INACTIVE: string;
+    };
+    account_types: {
+      Lead: string;
+      Prospect: string;
+      Client: string;
+    };
+    business_stages: {
+      Prospecting: string;
+      Qualification: string;
+      Proposal: string;
+      Negotiation: string;
+      'Closed Won': string;
+      'Closed Lost': string;
+    };
+    currencies: {
+      BRL: string;
+      USD: string;
+      EUR: string;
+    };
+    item_types: {
+      PRODUCT: string;
+      SERVICE: string;
+    };
+  };
 }
 
 const translations: Record<Language, Translations> = {
@@ -145,6 +180,8 @@ const translations: Record<Language, Translations> = {
         max_length: 'deve ter no máximo {max} caracteres',
         invalid_number: 'deve ser um número válido',
         invalid_date: 'deve ser uma data válida',
+        invalid_enum: 'deve ser um dos valores: {values}',
+        invalid_username: 'deve conter apenas letras, números, underscores (_) e pontos (.)',
       },
       relationships: {
         owner_not_found: 'O responsável informado não existe',
@@ -264,6 +301,39 @@ const translations: Record<Language, Translations> = {
       MEETING: 'Reunião',
       SYSTEM: 'Sistema',
     },
+    enum_values: {
+      user_roles: {
+        ADMIN: 'Administrador',
+        MANAGER: 'Gerente',
+        SALES_REP: 'Representante de Vendas'
+      },
+      account_statuses: {
+        ACTIVE: 'Ativo',
+        INACTIVE: 'Inativo'
+      },
+      account_types: {
+        Lead: 'Lead',
+        Prospect: 'Prospect',
+        Client: 'Cliente'
+      },
+      business_stages: {
+        Prospecting: 'Prospecção',
+        Qualification: 'Qualificação',
+        Proposal: 'Proposta',
+        Negotiation: 'Negociação',
+        'Closed Won': 'Fechado Ganho',
+        'Closed Lost': 'Fechado Perdido'
+      },
+      currencies: {
+        BRL: 'Real Brasileiro',
+        USD: 'Dólar Americano',
+        EUR: 'Euro'
+      },
+      item_types: {
+        PRODUCT: 'Produto',
+        SERVICE: 'Serviço'
+      }
+    },
   },
   'en-US': {
     errors: {
@@ -276,6 +346,8 @@ const translations: Record<Language, Translations> = {
         max_length: 'must have at most {max} characters',
         invalid_number: 'must be a valid number',
         invalid_date: 'must be a valid date',
+        invalid_enum: 'must be one of: {values}',
+        invalid_username: 'can only contain letters, numbers, underscores (_) and dots (.)',
       },
       relationships: {
         owner_not_found: 'The specified owner does not exist',
@@ -395,6 +467,39 @@ const translations: Record<Language, Translations> = {
       MEETING: 'Meeting',
       SYSTEM: 'System',
     },
+    enum_values: {
+      user_roles: {
+        ADMIN: 'Administrator',
+        MANAGER: 'Manager',
+        SALES_REP: 'Sales Representative'
+      },
+      account_statuses: {
+        ACTIVE: 'Active',
+        INACTIVE: 'Inactive'
+      },
+      account_types: {
+        Lead: 'Lead',
+        Prospect: 'Prospect',
+        Client: 'Client'
+      },
+      business_stages: {
+        Prospecting: 'Prospecting',
+        Qualification: 'Qualification',
+        Proposal: 'Proposal',
+        Negotiation: 'Negotiation',
+        'Closed Won': 'Closed Won',
+        'Closed Lost': 'Closed Lost'
+      },
+      currencies: {
+        BRL: 'Brazilian Real',
+        USD: 'US Dollar',
+        EUR: 'Euro'
+      },
+      item_types: {
+        PRODUCT: 'Product',
+        SERVICE: 'Service'
+      }
+    },
   },
   'es-CO': {
     errors: {
@@ -407,6 +512,8 @@ const translations: Record<Language, Translations> = {
         max_length: 'debe tener como máximo {max} caracteres',
         invalid_number: 'debe ser un número válido',
         invalid_date: 'debe ser una fecha válida',
+        invalid_enum: 'debe ser uno de: {values}',
+        invalid_username: 'debe contener solo letras, números, guiones bajos (_) y puntos (.)',
       },
       relationships: {
         owner_not_found: 'El responsable especificado no existe',
@@ -526,6 +633,39 @@ const translations: Record<Language, Translations> = {
       MEETING: 'Reunión',
       SYSTEM: 'Sistema',
     },
+    enum_values: {
+      user_roles: {
+        ADMIN: 'Administrador',
+        MANAGER: 'Gerente',
+        SALES_REP: 'Representante de Ventas'
+      },
+      account_statuses: {
+        ACTIVE: 'Activo',
+        INACTIVE: 'Inactivo'
+      },
+      account_types: {
+        Lead: 'Lead',
+        Prospect: 'Prospecto',
+        Client: 'Cliente'
+      },
+      business_stages: {
+        Prospecting: 'Prospección',
+        Qualification: 'Calificación',
+        Proposal: 'Propuesta',
+        Negotiation: 'Negociación',
+        'Closed Won': 'Cerrado Ganado',
+        'Closed Lost': 'Cerrado Perdido'
+      },
+      currencies: {
+        BRL: 'Real Brasileño',
+        USD: 'Dólar Americano',
+        EUR: 'Euro'
+      },
+      item_types: {
+        PRODUCT: 'Producto',
+        SERVICE: 'Servicio'
+      }
+    },
   },
 };
 
@@ -586,6 +726,12 @@ export function createValidationMessage(
       break;
     case 'max':
       errorMessage = t.errors.validation.max_length.replace('{max}', params?.maximum || '100');
+      break;
+    case 'enum':
+      errorMessage = t.errors.validation.invalid_enum.replace('{values}', params?.values || '');
+      break;
+    case 'username':
+      errorMessage = t.errors.validation.invalid_username;
       break;
     default:
       errorMessage = t.errors.validation.invalid_data;
@@ -817,4 +963,54 @@ export function createLocalizedMonthlyResponse(
   });
   
   return response;
+}
+
+/**
+ * Translates enum values to localized versions
+ * @param enumType - Type of enum (user_roles, account_statuses, etc.)
+ * @param enumValues - Array of enum values to translate
+ * @param language - Target language for translation
+ * @returns Comma-separated string of translated enum values
+ */
+export function translateEnumValues(
+  enumType: string,
+  enumValues: string[],
+  language: Language = 'pt-BR'
+): string {
+  const t = getTranslations(language);
+  const enumTranslations = t.enum_values[enumType as keyof typeof t.enum_values];
+  
+  if (!enumTranslations) {
+    return enumValues.join(', ');
+  }
+  
+  const translatedValues = enumValues.map(value => {
+    const translation = enumTranslations[value as keyof typeof enumTranslations];
+    return translation || value;
+  });
+  
+  return translatedValues.join(', ');
+}
+
+/**
+ * Creates an enhanced validation message for enum errors with translated values
+ * @param fieldName - Name of the field with enum error
+ * @param enumType - Type of enum for translation lookup
+ * @param enumValues - Array of valid enum values
+ * @param language - Target language for translation
+ * @returns Formatted validation message with translated enum values
+ */
+export function createEnumValidationMessage(
+  fieldName: string,
+  enumType: string,
+  enumValues: string[],
+  language: Language = 'pt-BR'
+): string {
+  const t = getTranslations(language);
+  const translatedField = translateFieldName(fieldName, language);
+  const translatedValues = translateEnumValues(enumType, enumValues, language);
+  
+  const errorMessage = t.errors.validation.invalid_enum.replace('{values}', translatedValues);
+  
+  return `${translatedField} ${errorMessage}`;
 }

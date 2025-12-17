@@ -202,6 +202,141 @@ GET /api/users?filter=role = 'SALES_REP'&page=1&size=10
 - `LIKE`, `ILIKE` (busca com wildcards %)
 - `IN`, `NOT IN` (múltiplos valores entre parênteses)
 
+## Tratamento de Erros e Validação
+
+### Validação de Enums
+
+A API possui validação robusta para campos enum com mensagens de erro traduzidas. Quando um valor inválido é enviado para um campo enum, a resposta incluirá:
+
+- Mensagem de erro traduzida baseada no header `Locale`
+- Lista dos valores válidos traduzidos
+- Código de status HTTP 400
+
+#### Exemplo de Erro de Enum
+
+**Requisição com role inválido:**
+```json
+POST /api/users
+{
+  "name": "João Silva",
+  "email": "joao@empresa.com",
+  "username": "joao.silva",
+  "role": "INVALID_ROLE"
+}
+```
+
+**Resposta (pt-BR):**
+```json
+{
+  "message": "Função deve ser um dos valores: Administrador, Gerente, Representante de Vendas",
+  "status": 400,
+  "requestId": "req_123456"
+}
+```
+
+**Resposta (en-US):**
+```json
+{
+  "message": "Role must be one of: Administrator, Manager, Sales Representative",
+  "status": 400,
+  "requestId": "req_123456"
+}
+```
+
+#### Exemplo de Erro de Username
+
+**Requisição com username inválido:**
+```json
+POST /api/users
+{
+  "name": "Maria Santos",
+  "email": "maria@empresa.com",
+  "username": "maria@santos",
+  "role": "SALES_REP"
+}
+```
+
+**Resposta (pt-BR):**
+```json
+{
+  "message": "username deve conter apenas letras, números, underscores (_) e pontos (.)",
+  "status": 400,
+  "requestId": "req_123456"
+}
+```
+
+**Resposta (en-US):**
+```json
+{
+  "message": "username can only contain letters, numbers, underscores (_) and dots (.)",
+  "status": 400,
+  "requestId": "req_123456"
+}
+```
+
+**Resposta (es-CO):**
+```json
+{
+  "message": "username debe contener solo letras, números, guiones bajos (_) y puntos (.)",
+  "status": 400,
+  "requestId": "req_123456"
+}
+```
+
+#### Valores Válidos por Campo
+
+**Username:**
+- Deve conter apenas letras (a-z, A-Z), números (0-9), underscores (_) e pontos (.)
+- Não são permitidos acentos, espaços ou outros caracteres especiais
+- Exemplos válidos: `joao.silva`, `lucas_nunes`, `ana.costa.123`, `pedro_santos_2024`
+- Exemplos inválidos: `josé.silva`, `maria@santos`, `carlos-lopez`, `ana costa`
+
+**Função de Usuário (role):**
+- `ADMIN` - Administrador
+- `MANAGER` - Gerente  
+- `SALES_REP` - Representante de Vendas
+
+**Status de Conta (status):**
+- `ACTIVE` - Ativo
+- `INACTIVE` - Inativo
+
+**Tipo de Conta (type):**
+- `Lead` - Lead
+- `Prospect` - Prospect
+- `Client` - Cliente
+
+**Estágio de Negócio (stage):**
+- `Prospecting` - Prospecção
+- `Qualification` - Qualificação
+- `Proposal` - Proposta
+- `Negotiation` - Negociação
+- `Closed Won` - Fechado Ganho
+- `Closed Lost` - Fechado Perdido
+
+**Moeda (currency):**
+- `BRL` - Real Brasileiro
+- `USD` - Dólar Americano
+- `EUR` - Euro
+
+**Tipo de Item (itemType):**
+- `PRODUCT` - Produto
+- `SERVICE` - Serviço
+
+### Localização
+
+A API suporta múltiplos idiomas através do header `Locale`:
+
+- `pt-BR` - Português Brasileiro (padrão)
+- `en-US` - Inglês Americano
+- `es-CO` - Espanhol Colombiano
+
+**Exemplo:**
+```bash
+curl -H "Locale: en-US" -H "Content-Type: application/json" \
+  -d '{"role": "INVALID"}' \
+  http://localhost:3000/api/users
+```
+
 ## Variáveis de Ambiente
 
 ```env

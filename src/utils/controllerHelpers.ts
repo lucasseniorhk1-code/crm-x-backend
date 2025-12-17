@@ -7,6 +7,7 @@ import {
   getLanguageFromRequest, 
   getTranslations, 
   createValidationMessage,
+  createEnumValidationMessage,
   getRelationshipErrorMessage,
   getNotFoundMessage
 } from './translations';
@@ -20,7 +21,8 @@ export function handleValidationError(validationResult: any, res: Response, req?
     const language = req ? getLanguageFromRequest(req) : 'pt-BR';
     
     // Extract the first validation error for a cleaner message
-    const firstError = validationResult.error.errors[0];
+    const issues = validationResult.error?.issues || [];
+    const firstError = issues[0];
     let message = getTranslations(language).errors.validation.invalid_data;
     
     if (firstError) {
@@ -28,25 +30,61 @@ export function handleValidationError(validationResult: any, res: Response, req?
       const errorCode = firstError.code;
       const errorMessage = firstError.message;
       
-      // Determine error type based on Zod error
-      let errorType = 'invalid_data';
-      let params: Record<string, any> = {};
-      
-      if (errorCode === 'invalid_type' && errorMessage.includes('Required')) {
-        errorType = 'required';
-      } else if (errorMessage.includes('email')) {
-        errorType = 'email';
-      } else if (errorMessage.includes('uuid')) {
-        errorType = 'uuid';
-      } else if (errorCode === 'too_small') {
-        errorType = 'min';
-        params.minimum = firstError.minimum;
-      } else if (errorCode === 'too_big') {
-        errorType = 'max';
-        params.maximum = firstError.maximum;
+      // Check if it's an enum validation error (custom_error from refine)
+      if (errorCode === 'custom' && errorMessage.includes('must be one of')) {
+        // Extract enum values from the error message and determine enum type
+        const valuesMatch = errorMessage.match(/must be one of: (.+)/);
+        if (valuesMatch) {
+          const enumValuesString = valuesMatch[1];
+          const enumValues = enumValuesString.split(', ');
+          
+          // Determine enum type based on field name and values
+          let enumType = '';
+          if (field === 'role') {
+            enumType = 'user_roles';
+          } else if (field === 'status') {
+            enumType = 'account_statuses';
+          } else if (field === 'type') {
+            enumType = 'account_types';
+          } else if (field === 'stage') {
+            enumType = 'business_stages';
+          } else if (field === 'currency') {
+            enumType = 'currencies';
+          } else if (field === 'itemType') {
+            enumType = 'item_types';
+          }
+          
+          if (enumType) {
+            message = createEnumValidationMessage(field, enumType, enumValues, language);
+          } else {
+            message = createValidationMessage(field, 'enum', language, { values: enumValuesString });
+          }
+        } else {
+          message = createValidationMessage(field, 'invalid_data', language);
+        }
+      } else {
+        // Determine error type based on Zod error
+        let errorType = 'invalid_data';
+        let params: Record<string, any> = {};
+        
+        if (errorCode === 'invalid_type' && errorMessage.includes('Required')) {
+          errorType = 'required';
+        } else if (errorMessage.includes('email')) {
+          errorType = 'email';
+        } else if (errorMessage.includes('uuid')) {
+          errorType = 'uuid';
+        } else if (field === 'username') {
+          errorType = 'username';
+        } else if (errorCode === 'too_small') {
+          errorType = 'min';
+          params.minimum = firstError.minimum;
+        } else if (errorCode === 'too_big') {
+          errorType = 'max';
+          params.maximum = firstError.maximum;
+        }
+        
+        message = createValidationMessage(field, errorType, language, params);
       }
-      
-      message = createValidationMessage(field, errorType, language, params);
     }
     
     // Log validation error for debugging

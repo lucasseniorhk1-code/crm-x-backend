@@ -102,7 +102,7 @@ export const AccountIdParamSchema = z.object({
 // Create User Schema - for POST /api/users (camelCase)
 export const CreateUserSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  username: z.string().min(1, 'Username is required').regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers and underscores'),
+  username: z.string().min(1, 'Username is required').regex(/^[a-zA-Z0-9_.]+$/, 'Username can only contain letters, numbers, underscores and dots'),
   email: z.string().email('Valid email is required'),
   role: UserRoleSchema.optional(),
   manager: OptionalReferenceSchema
@@ -111,7 +111,7 @@ export const CreateUserSchema = z.object({
 // Update User Schema - for PUT /api/users/:id (all fields optional, camelCase)
 export const UpdateUserSchema = z.object({
   name: z.string().min(1, 'Name cannot be empty').optional(),
-  username: z.string().min(1, 'Username cannot be empty').regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers and underscores').optional(),
+  username: z.string().min(1, 'Username cannot be empty').regex(/^[a-zA-Z0-9_.]+$/, 'Username can only contain letters, numbers, underscores and dots').optional(),
   email: z.string().email('Valid email is required').optional(),
   role: UserRoleSchema.optional(),
   manager: OptionalReferenceSchema
