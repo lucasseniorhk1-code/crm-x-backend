@@ -12,6 +12,7 @@ import itemRoutes from './routes/itemRoutes';
 import businessProposalRoutes from './routes/businessProposalRoutes';
 import businessProposalItemRoutes from './routes/businessProposalItemRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
+import integrationRoutes from './routes/integrationRoutes';
 
 import { 
   requestIdMiddleware, 
@@ -51,6 +52,7 @@ const ITEMS_API = BASE_API.concat("items");
 const BUSINESS_PROPOSALS_API = BASE_API.concat("business-proposals");
 const BUSINESS_PROPOSAL_ITEMS_API = BASE_API.concat("business-proposal-items");
 const DASHBOARD_API = BASE_API.concat("dashboard");
+const INTEGRATION_API = BASE_API.concat("integration");
 
 
 app.use(ACCOUNT_API, accountRoutes);
@@ -61,6 +63,7 @@ app.use(ITEMS_API, itemRoutes);
 app.use(BUSINESS_PROPOSALS_API, businessProposalRoutes);
 app.use(BUSINESS_PROPOSAL_ITEMS_API, businessProposalItemRoutes);
 app.use(DASHBOARD_API, dashboardRoutes);
+app.use(INTEGRATION_API, integrationRoutes);
 
 
 
@@ -100,6 +103,7 @@ app.listen(PORT, () => {
   logger.info('SERVER', `Business Proposals: ${BUSINESS_PROPOSALS_API}`);
   logger.info('SERVER', `Business Proposal Items: ${BUSINESS_PROPOSAL_ITEMS_API}`);
   logger.info('SERVER', `Dashboard: ${DASHBOARD_API}`);
+  logger.info('SERVER', `Integration: ${INTEGRATION_API}`);
 });
 
 export default app;
