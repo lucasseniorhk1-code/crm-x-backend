@@ -158,6 +158,9 @@ export interface BusinessProposalDB {
   theme_color?: string | null;
   terms_and_conditions?: string | null;
   show_unit_prices?: boolean | null;
+  send_message?: string | null;
+  send_status: string;
+  send_number?: string | null;
   created_at: string;
 }
 
@@ -199,6 +202,9 @@ export interface BusinessProposal {
   themeColor?: string;
   termsAndConditions?: string;
   showUnitPrices?: boolean;
+  sendMessage?: string;
+  sendStatus: string;
+  sendNumber?: string;
   createdAt: string;
 }
 
@@ -626,6 +632,9 @@ export function businessProposalDbToApi(dbProposal: BusinessProposalDB): Busines
     themeColor: dbProposal.theme_color,
     termsAndConditions: dbProposal.terms_and_conditions,
     showUnitPrices: dbProposal.show_unit_prices,
+    sendMessage: dbProposal.send_message,
+    sendStatus: dbProposal.send_status,
+    sendNumber: dbProposal.send_number,
     createdAt: dbProposal.created_at
   };
   

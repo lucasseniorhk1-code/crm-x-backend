@@ -113,6 +113,9 @@ export interface Translations {
     themeColor: string;
     termsAndConditions: string;
     showUnitPrices: string;
+    sendMessage: string;
+    sendStatus: string;
+    sendNumber: string;
     // BusinessProposalItem fields
     proposalId: string;
     itemId: string;
@@ -243,6 +246,9 @@ const translations: Record<Language, Translations> = {
       themeColor: 'Cor do tema',
       termsAndConditions: 'Termos e condições',
       showUnitPrices: 'Mostrar preços unitários',
+      sendMessage: 'Mensagem de envio',
+      sendStatus: 'Status de envio',
+      sendNumber: 'Número de envio',
       // BusinessProposalItem fields
       proposalId: 'Proposta',
       itemId: 'Item',
@@ -371,6 +377,9 @@ const translations: Record<Language, Translations> = {
       themeColor: 'Theme color',
       termsAndConditions: 'Terms and conditions',
       showUnitPrices: 'Show unit prices',
+      sendMessage: 'Send message',
+      sendStatus: 'Send status',
+      sendNumber: 'Send number',
       // BusinessProposalItem fields
       proposalId: 'Proposal',
       itemId: 'Item',
@@ -499,6 +508,9 @@ const translations: Record<Language, Translations> = {
       themeColor: 'Color del tema',
       termsAndConditions: 'Términos y condiciones',
       showUnitPrices: 'Mostrar precios unitarios',
+      sendMessage: 'Mensaje de envío',
+      sendStatus: 'Estado de envío',
+      sendNumber: 'Número de envío',
       // BusinessProposalItem fields
       proposalId: 'Propuesta',
       itemId: 'Artículo',

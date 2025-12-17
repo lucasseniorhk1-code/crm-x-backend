@@ -89,6 +89,9 @@ CREATE TABLE business_proposal
     theme_color          TEXT,
     terms_and_conditions TEXT,
     show_unit_prices     BOOLEAN              DEFAULT true,
+    send_message         TEXT,
+    send_status          TEXT        NOT NULL DEFAULT 'PENDING',
+    send_number          TEXT,
     created_at           TIMESTAMPTZ          DEFAULT NOW()
 );
 
@@ -130,5 +133,6 @@ CREATE INDEX idx_business_proposal_business_id ON business_proposal (business_id
 CREATE INDEX idx_business_proposal_responsible_id ON business_proposal (responsible_id);
 CREATE INDEX idx_business_proposal_status ON business_proposal (status);
 CREATE INDEX idx_business_proposal_date ON business_proposal (date);
+CREATE INDEX idx_business_proposal_send_status ON business_proposal (send_status);
 CREATE INDEX idx_business_proposal_item_proposal_id ON business_proposal_item (proposal_id);
 CREATE INDEX idx_business_proposal_item_item_id ON business_proposal_item (item_id);

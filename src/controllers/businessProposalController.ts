@@ -16,7 +16,8 @@ import {
   businessProposalApiToDb,
   businessProposalItemDbToApi,
   businessProposalItemApiToDb,
-  BusinessProposalStatuses 
+  BusinessProposalStatuses,
+  SendStatuses 
 } from '../types';
 import { 
   handleValidationError, 
@@ -79,7 +80,8 @@ export async function createBusinessProposal(req: Request, res: Response): Promi
     const dbProposalData = businessProposalApiToDb(proposalData);
     const proposalToInsert = {
       ...dbProposalData,
-      status: proposalData.status || BusinessProposalStatuses.DRAFT
+      status: proposalData.status || BusinessProposalStatuses.DRAFT,
+      send_status: SendStatuses.PENDING
     };
 
     // Insert business proposal into database

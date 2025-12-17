@@ -1597,6 +1597,16 @@ components:
           type: "string"
         showUnitPrices:
           type: "boolean"
+        sendMessage:
+          type: "string"
+          description: "Optional message for integration purposes (read-only)"
+        sendStatus:
+          type: "string"
+          enum: ["PENDING", "ERROR", "SUCCESS"]
+          description: "Status of send operation (read-only)"
+        sendNumber:
+          type: "string"
+          description: "Optional number for integration purposes (read-only)"
         createdAt:
           type: "string"
           format: "date-time"
@@ -1608,6 +1618,7 @@ components:
         - status
         - date
         - value
+        - sendStatus
         - createdAt
       description: "Business proposal entity response"
       example:
@@ -1624,6 +1635,9 @@ components:
         themeColor: "#007bff"
         termsAndConditions: "Standard terms and conditions..."
         showUnitPrices: true
+        sendMessage: null
+        sendStatus: "PENDING"
+        sendNumber: null
         createdAt: "2024-01-10T08:00:00.000Z"
     BusinessProposalItem:
       type: "object"
@@ -1735,6 +1749,16 @@ components:
                 type: "string"
               showUnitPrices:
                 type: "boolean"
+              sendMessage:
+                type: "string"
+                description: "Optional message for integration purposes (read-only)"
+              sendStatus:
+                type: "string"
+                enum: ["PENDING", "ERROR", "SUCCESS"]
+                description: "Status of send operation (read-only)"
+              sendNumber:
+                type: "string"
+                description: "Optional number for integration purposes (read-only)"
               createdAt:
                 type: "string"
                 format: "date-time"
@@ -1746,6 +1770,7 @@ components:
               - status
               - date
               - value
+              - sendStatus
               - createdAt
           description: "Array of BusinessProposal items"
         totalElements:

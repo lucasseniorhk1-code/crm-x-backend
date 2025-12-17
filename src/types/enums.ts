@@ -53,6 +53,12 @@ export const BusinessProposalStatuses = {
   REJECTED: 'Rejeitado'
 } as const;
 
+export const SendStatuses = {
+  PENDING: 'PENDING',
+  ERROR: 'ERROR',
+  SUCCESS: 'SUCCESS'
+} as const;
+
 export const SupportedLocales = {
   PT_BR: 'pt-BR',
   EN_US: 'en-US'
@@ -73,6 +79,7 @@ export type Currency = typeof Currencies[keyof typeof Currencies];
 export type ItemType = typeof ItemTypes[keyof typeof ItemTypes];
 export type TimelineType = typeof TimelineTypes[keyof typeof TimelineTypes];
 export type BusinessProposalStatus = typeof BusinessProposalStatuses[keyof typeof BusinessProposalStatuses];
+export type SendStatus = typeof SendStatuses[keyof typeof SendStatuses];
 export type SupportedLocale = typeof SupportedLocales[keyof typeof SupportedLocales];
 export type DashboardPeriod = typeof DashboardPeriods[keyof typeof DashboardPeriods];
 
@@ -109,6 +116,10 @@ export const isValidBusinessProposalStatus = (value: string): value is BusinessP
   return Object.values(BusinessProposalStatuses).includes(value as BusinessProposalStatus);
 };
 
+export const isValidSendStatus = (value: string): value is SendStatus => {
+  return Object.values(SendStatuses).includes(value as SendStatus);
+};
+
 export const isValidSupportedLocale = (value: string): value is SupportedLocale => {
   return Object.values(SupportedLocales).includes(value as SupportedLocale);
 };
@@ -125,5 +136,6 @@ export const getDefaultCurrency = (): Currency => Currencies.BRL;
 export const getDefaultItemType = (): ItemType => ItemTypes.PRODUCT;
 export const getDefaultTimelineType = (): TimelineType => TimelineTypes.NOTE;
 export const getDefaultBusinessProposalStatus = (): BusinessProposalStatus => BusinessProposalStatuses.DRAFT;
+export const getDefaultSendStatus = (): SendStatus => SendStatuses.PENDING;
 export const getDefaultSupportedLocale = (): SupportedLocale => SupportedLocales.PT_BR;
 export const getDefaultDashboardPeriod = (): DashboardPeriod => DashboardPeriods.THIS_MONTH;
