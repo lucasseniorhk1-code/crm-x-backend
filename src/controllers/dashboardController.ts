@@ -28,14 +28,15 @@ export async function getRevenuePerPeriod(req: Request, res: Response): Promise<
     const dateFilter = getDateRangeForPeriod(period);
 
     // Execute revenue aggregation query
-    // Filter by stage = 'Closed Won' and period from created_at
+    // Filter by stage = 'Closed Won' and period from closing_date
     // Group by month and calculate sum of values
     const { data: monthlyRevenue, error } = await supabaseAdmin
       .from('business')
-      .select('value, created_at')
+      .select('value, closing_date')
       .eq('stage', BusinessStages.CLOSED_WON)
-      .gte('created_at', dateFilter.startDate)
-      .lte('created_at', dateFilter.endDate);
+      .not('closing_date', 'is', null)
+      .gte('closing_date', dateFilter.startDate)
+      .lte('closing_date', dateFilter.endDate);
 
     if (error) {
       handleDatabaseError('SELECT', 'business', error, res, req);
@@ -54,9 +55,9 @@ export async function getRevenuePerPeriod(req: Request, res: Response): Promise<
     // Aggregate revenue by month
     if (monthlyRevenue && monthlyRevenue.length > 0) {
       monthlyRevenue.forEach((business) => {
-        if (business.created_at) {
-          const createdDate = new Date(business.created_at);
-          const month = createdDate.getUTCMonth() + 1; // getUTCMonth() returns 0-11, we need 1-12
+        if (business.closing_date) {
+          const closingDate = new Date(business.closing_date);
+          const month = closingDate.getUTCMonth() + 1; // getUTCMonth() returns 0-11, we need 1-12
           monthlyTotals[month] += business.value || 0;
         }
       });
