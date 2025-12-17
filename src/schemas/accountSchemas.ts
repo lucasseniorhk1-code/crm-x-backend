@@ -33,6 +33,9 @@ const ReferenceSchema = z.object({
   id: UUIDSchema
 });
 
+// Optional reference schema that accepts null
+const OptionalReferenceSchema = ReferenceSchema.optional().or(z.null());
+
 // Email validation schema
 const EmailSchema = z.string().email().optional().or(z.null());
 
@@ -102,7 +105,7 @@ export const CreateUserSchema = z.object({
   username: z.string().min(1, 'Username is required').regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers and underscores'),
   email: z.string().email('Valid email is required'),
   role: UserRoleSchema.optional(),
-  manager: ReferenceSchema.optional()
+  manager: OptionalReferenceSchema
 });
 
 // Update User Schema - for PUT /api/users/:id (all fields optional, camelCase)
@@ -111,7 +114,7 @@ export const UpdateUserSchema = z.object({
   username: z.string().min(1, 'Username cannot be empty').regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers and underscores').optional(),
   email: z.string().email('Valid email is required').optional(),
   role: UserRoleSchema.optional(),
-  manager: ReferenceSchema.optional()
+  manager: OptionalReferenceSchema
 });
 
 // User ID parameter schema for route parameters
@@ -141,7 +144,7 @@ export const CreateBusinessSchema = z.object({
   currency: CurrencySchema.optional(),
   stage: BusinessStageSchema,
   probability: z.number().min(0).max(100, 'Probability must be between 0 and 100').optional(),
-  responsible: ReferenceSchema.optional(),
+  responsible: OptionalReferenceSchema,
   closingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Closing date must be in YYYY-MM-DD format').optional()
 });
 
@@ -153,7 +156,7 @@ export const UpdateBusinessSchema = z.object({
   currency: CurrencySchema.optional(),
   stage: BusinessStageSchema.optional(),
   probability: z.number().min(0).max(100, 'Probability must be between 0 and 100').optional(),
-  responsible: ReferenceSchema.optional(),
+  responsible: OptionalReferenceSchema,
   closingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Closing date must be in YYYY-MM-DD format').optional().or(z.null())
 });
 

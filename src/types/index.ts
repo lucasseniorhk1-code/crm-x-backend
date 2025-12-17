@@ -8,7 +8,7 @@ export interface UserDB {
   name: string;
   username: string;
   role: string;
-  manager_id?: string;
+  manager_id?: string | null;
   email: string;
   created_at: string;
 }
@@ -92,7 +92,7 @@ export interface BusinessDB {
   currency: string;
   stage: string;
   probability: number;
-  responsible_id?: string;
+  responsible_id?: string | null;
   closing_date?: string;
   created_at: string;
 }
@@ -275,7 +275,7 @@ export interface CreateBusinessRequest {
   currency?: string;
   stage: string;
   probability?: number;
-  responsible?: UserReference;
+  responsible?: UserReference | null;
   closingDate?: string;
 }
 
@@ -286,7 +286,7 @@ export interface UpdateBusinessRequest {
   currency?: string;
   stage?: string;
   probability?: number;
-  responsible?: UserReference;
+  responsible?: UserReference | null;
   closingDate?: string | null;
 }
 
@@ -294,7 +294,7 @@ export interface CreateUserRequest {
   name: string;
   username: string;
   role?: string;
-  manager?: UserReference;
+  manager?: UserReference | null;
   email: string;
 }
 
@@ -302,7 +302,7 @@ export interface UpdateUserRequest {
   name?: string;
   username?: string;
   role?: string;
-  manager?: UserReference;
+  manager?: UserReference | null;
   email?: string;
 }
 
@@ -533,7 +533,9 @@ export function businessApiToDb(apiBusiness: CreateBusinessRequest | UpdateBusin
   if ('currency' in apiBusiness && apiBusiness.currency !== undefined) dbBusiness.currency = apiBusiness.currency;
   if ('stage' in apiBusiness && apiBusiness.stage !== undefined) dbBusiness.stage = apiBusiness.stage;
   if ('probability' in apiBusiness && apiBusiness.probability !== undefined) dbBusiness.probability = apiBusiness.probability;
-  if ('responsible' in apiBusiness && apiBusiness.responsible !== undefined) dbBusiness.responsible_id = apiBusiness.responsible.id;
+  if ('responsible' in apiBusiness && apiBusiness.responsible !== undefined) {
+    dbBusiness.responsible_id = apiBusiness.responsible ? apiBusiness.responsible.id : null;
+  }
   if ('closingDate' in apiBusiness && apiBusiness.closingDate !== undefined) dbBusiness.closing_date = apiBusiness.closingDate || undefined;
   
   return dbBusiness;
@@ -559,7 +561,9 @@ export function userApiToDb(apiUser: CreateUserRequest | UpdateUserRequest): Par
   if ('name' in apiUser && apiUser.name !== undefined) dbUser.name = apiUser.name;
   if ('username' in apiUser && apiUser.username !== undefined) dbUser.username = apiUser.username;
   if ('role' in apiUser && apiUser.role !== undefined) dbUser.role = apiUser.role;
-  if ('manager' in apiUser && apiUser.manager !== undefined) dbUser.manager_id = apiUser.manager.id;
+  if ('manager' in apiUser && apiUser.manager !== undefined) {
+    dbUser.manager_id = apiUser.manager ? apiUser.manager.id : null;
+  }
   if ('email' in apiUser && apiUser.email !== undefined) dbUser.email = apiUser.email;
   
   return dbUser;
